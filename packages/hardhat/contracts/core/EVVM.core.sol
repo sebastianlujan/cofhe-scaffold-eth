@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title EVVM Core - Virtual Blockchain with FHE
 /// @notice MVP of EVVM Core as "virtual blockchain" using FHE for private balances
-/// @dev Step 8: Advanced block management
+/// @dev Step 9: Admin functions and testing utilities
 contract EVVMCore is Ownable {
     // ============ Structs ============
     
@@ -102,6 +102,15 @@ contract EVVMCore is Ownable {
     event VirtualBlockCreated(
         uint64 indexed vBlockNumber,
         bytes32 stateCommitment
+    );
+    
+    /// @notice Emitted when the EVVM ID is updated
+    event EvvmIDUpdated(uint256 oldEvvmID, uint256 newEvvmID);
+    
+    /// @notice Emitted when balance is added via faucet
+    event FaucetBalanceAdded(
+        bytes32 indexed vaddr,
+        euint64 amountAdded
     );
 
     // ============ Constructor ============
@@ -501,5 +510,52 @@ contract EVVMCore is Ownable {
             // With custom salt for additional entropy
             return keccak256(abi.encodePacked(realAddress, vChainId, evvmID, salt));
         }
+    }
+    
+    // ============ Admin Functions ============
+    
+    /// @notice Updates the EVVM ID (admin only)
+    /// @dev This function allows the contract owner to update the EVVM ID
+    /// @dev The EVVM ID is used for signature verification and vaddr generation
+    /// @param newEvvmID The new EVVM ID to set
+    function setEvvmID(uint256 newEvvmID) external onlyOwner {
+        uint256 oldEvvmID = evvmID;
+        evvmID = newEvvmID;
+        emit EvvmIDUpdated(oldEvvmID, newEvvmID);
+    }
+    
+    /// @notice Adds balance to a virtual account via faucet (admin only, for testing)
+    /// @dev This function is useful for testing and development
+    /// @dev It adds encrypted balance to an existing account without affecting the nonce
+    /// @param vaddr The virtual address of the account to add balance to
+    /// @param amount The encrypted amount to add (InEuint64)
+    function faucetAddBalance(
+        bytes32 vaddr,
+        InEuint64 calldata amount
+    ) external onlyOwner {
+        require(accounts[vaddr].exists, "EVVM: account does not exist");
+        
+        // Convert the input handle to encrypted uint64
+        euint64 amountEnc = FHE.asEuint64(amount);
+        
+        // Set permissions on the encrypted amount
+        FHE.allowThis(amountEnc);
+        FHE.allowSender(amountEnc);
+        
+        // Get the current account
+        VirtualAccount storage acc = accounts[vaddr];
+        
+        // Add the amount to the existing balance
+        euint64 newBalance = FHE.add(acc.balance, amountEnc);
+        
+        // Update the account balance
+        acc.balance = newBalance;
+        
+        // Set permissions on the new balance
+        FHE.allowThis(newBalance);
+        FHE.allowSender(newBalance);
+        
+        // Emit event
+        emit FaucetBalanceAdded(vaddr, amountEnc);
     }
 }
