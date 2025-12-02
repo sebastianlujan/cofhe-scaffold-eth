@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title EVVM Core - Virtual Blockchain with FHE
 /// @notice MVP of EVVM Core as "virtual blockchain" using FHE for private balances
-/// @dev Step 3: Basic transfers
+/// @dev Step 4: Virtual chain progression
 contract EVVMCore is Ownable {
     // ============ Structs ============
     
@@ -28,6 +28,10 @@ contract EVVMCore is Ownable {
     
     /// @notice EVVM ID for future signature verification
     uint256 public evvmID;
+    
+    /// @notice Cryptographic commitment to the current state of the virtual blockchain
+    /// @dev This can be a Merkle root, hash of all account states, or any state commitment scheme
+    bytes32 public stateCommitment;
     
     /// @notice Map of virtual addresses to accounts
     /// @dev vaddr is a pseudonymous identifier (e.g. keccak256(pubkey) or hash of real address)
@@ -52,11 +56,9 @@ contract EVVMCore is Ownable {
     );
     
     /// @notice Emitted when the virtual state commitment is updated
-    /// @dev Will be implemented in step 4
     event StateCommitmentUpdated(bytes32 newCommitment);
     
     /// @notice Emitted when a virtual block is created
-    /// @dev Will be implemented in step 4
     event VirtualBlockCreated(
         uint64 indexed vBlockNumber,
         bytes32 stateCommitment
@@ -195,5 +197,29 @@ contract EVVMCore is Ownable {
         );
         
         return txId;
+    }
+
+    // ============ Virtual Block Management ============
+    
+    /// @notice Creates a new virtual block with a state commitment
+    /// @dev This function allows explicit block creation with a cryptographic commitment
+    /// @param newCommitment The state commitment for the new block (e.g., Merkle root of all accounts)
+    function createVirtualBlock(bytes32 newCommitment) external {
+        // Increment block number
+        vBlockNumber += 1;
+        
+        // Update state commitment
+        stateCommitment = newCommitment;
+        
+        // Emit block creation event
+        emit VirtualBlockCreated(vBlockNumber, newCommitment);
+    }
+    
+    /// @notice Updates the state commitment without creating a new block
+    /// @dev Useful for updating the commitment when state changes occur
+    /// @param newCommitment The new state commitment
+    function updateStateCommitment(bytes32 newCommitment) external {
+        stateCommitment = newCommitment;
+        emit StateCommitmentUpdated(newCommitment);
     }
 }
