@@ -114,6 +114,116 @@ function applyTransfer(
 
 ---
 
+## 📋 Step 4B: State Commitment Calculation (Off-Chain)
+
+**Objective**: Document and provide utilities for calculating state commitments off-chain.
+
+**Files to create/modify**:
+- `packages/hardhat/scripts/calculateStateCommitment.ts` (TypeScript utility)
+- `DEVELOPMENT_PLAN.md` (documentation)
+
+**Features to add**:
+
+- TypeScript utility script to calculate state commitments
+- Function to fetch all virtual accounts from the contract
+- Function to decrypt balances (using CoFHE SDK)
+- Function to build Merkle tree from account states
+- Function to generate state commitment hash
+- Documentation explaining why commitments must be calculated off-chain
+
+**Key code structure**:
+
+```typescript
+// packages/hardhat/scripts/calculateStateCommitment.ts
+
+import { ethers } from "hardhat";
+import { CoFHE } from "@fhenixprotocol/cofhe-sdk";
+
+interface AccountState {
+    vaddr: string;
+    balance: bigint;  // Decrypted balance
+    nonce: number;
+}
+
+async function calculateStateCommitment(
+    evvmCoreAddress: string
+): Promise<string> {
+    const evvmCore = await ethers.getContractAt("EVVMCore", evvmCoreAddress);
+    const cofheClient = new CoFHE(/* config */);
+    
+    // 1. Get all registered accounts (requires indexing or events)
+    const accounts = await getAllAccounts(evvmCore);
+    
+    // 2. Decrypt balances for each account
+    const accountStates: AccountState[] = [];
+    for (const account of accounts) {
+        const encryptedBalance = await evvmCore.getEncryptedBalance(account.vaddr);
+        const balance = await cofheClient.decrypt(encryptedBalance);
+        const nonce = await evvmCore.getNonce(account.vaddr);
+        
+        accountStates.push({
+            vaddr: account.vaddr,
+            balance: balance,
+            nonce: nonce
+        });
+    }
+    
+    // 3. Build Merkle tree from account states
+    const leaves = accountStates.map(acc => 
+        ethers.keccak256(
+            ethers.AbiCoder.defaultAbiCoder().encode(
+                ["bytes32", "uint64", "uint64"],
+                [acc.vaddr, acc.balance, acc.nonce]
+            )
+        )
+    );
+    
+    // 4. Calculate Merkle root (state commitment)
+    const stateCommitment = calculateMerkleRoot(leaves);
+    
+    return stateCommitment;
+}
+
+function calculateMerkleRoot(leaves: string[]): string {
+    // Merkle tree implementation
+    // ... (use a library like merkletreejs or implement custom)
+}
+```
+
+**Why Off-Chain?**
+
+1. **Encrypted Data Limitation**: 
+   - On-chain, we only have access to encrypted handles (`euint64`), not plaintext values
+   - A state commitment needs to represent the actual state (real balances, nonces), not encrypted handles
+   - Hashing an encrypted handle would only prove the handle exists, not the actual balance
+
+2. **Decryption Requirement**:
+   - To create a meaningful state commitment, we need to decrypt balances first
+   - Decryption requires the private key/decryption key, which cannot be used on-chain
+   - CoFHE SDK provides off-chain decryption capabilities
+
+3. **Efficiency**:
+   - Building Merkle trees and hashing all accounts is gas-intensive
+   - Off-chain calculation is more efficient and can be done by indexers/validators
+   - The commitment is then submitted on-chain via `updateStateCommitment()` or `createVirtualBlock()`
+
+4. **Privacy Consideration**:
+   - The commitment is a hash, so it doesn't reveal individual balances
+   - Only authorized parties (with decryption keys) can calculate it
+   - The commitment itself is public and verifiable
+
+**Alternative Approaches**:
+
+- **Option 1**: Hash encrypted handles directly (less secure, doesn't represent real state)
+- **Option 2**: Use zero-knowledge proofs to prove state without revealing it (future enhancement)
+- **Option 3**: Trusted validators calculate and submit commitments (current approach)
+
+**Context**: This step provides the necessary tooling and documentation for calculating state commitments. It's essential for maintaining blockchain integrity while preserving privacy through FHE. The commitment serves as a cryptographic proof of the entire system state at a given block.
+
+**Commit message**: `feat: Add off-chain state commitment calculation utilities and documentation`
+
+---
+
 ## 📋 Step 5: Virtual Transaction Registry
 
 **Objective**: Store and query applied virtual transactions.
@@ -467,6 +577,7 @@ event CoffeeOrdered(
 | 2 | Virtual accounts | Step 1 |
 | 3 | Transfers | Step 2 |
 | 4 | Virtual blocks | Step 3 |
+| 4B | State commitment calc | Step 4 (off-chain) |
 | 5 | Transaction registry | Step 3 |
 | 6 | Batch transfers | Step 3, 5 |
 | 7 | Utilities | Step 2, 3 |

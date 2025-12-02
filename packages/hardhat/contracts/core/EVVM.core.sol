@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title EVVM Core - Virtual Blockchain with FHE
 /// @notice MVP of EVVM Core as "virtual blockchain" using FHE for private balances
-/// @dev Step 4: Virtual chain progression
+/// @dev Step 5: Virtual transaction registry
 contract EVVMCore is Ownable {
     // ============ Structs ============
     
@@ -15,6 +15,17 @@ contract EVVMCore is Ownable {
     struct VirtualAccount {
         euint64 balance;      // Encrypted balance of the principal token
         uint64 nonce;         // Transaction counter from this account (public for replay protection)
+        bool exists;          // Existence flag
+    }
+    
+    /// @notice Represents a virtual transaction in the blockchain
+    struct VirtualTransaction {
+        bytes32 fromVaddr;    // Source virtual account
+        bytes32 toVaddr;      // Destination virtual account
+        euint64 amountEnc;    // Encrypted amount transferred
+        uint64 nonce;         // Nonce used in this transaction
+        uint64 vBlockNumber;  // Virtual block number when transaction was applied
+        uint256 timestamp;    // Block timestamp when transaction was applied
         bool exists;          // Existence flag
     }
 
@@ -36,6 +47,14 @@ contract EVVMCore is Ownable {
     /// @notice Map of virtual addresses to accounts
     /// @dev vaddr is a pseudonymous identifier (e.g. keccak256(pubkey) or hash of real address)
     mapping(bytes32 => VirtualAccount) private accounts;
+    
+    /// @notice Map of transaction IDs to virtual transactions
+    /// @dev txId is a unique identifier for each transaction
+    mapping(uint256 => VirtualTransaction) public virtualTransactions;
+    
+    /// @notice Next transaction ID to be assigned
+    /// @dev Starts at 1, increments for each new transaction
+    uint256 public nextTxId;
 
     // ============ Events ============
     
@@ -73,6 +92,7 @@ contract EVVMCore is Ownable {
         vChainId = _vChainId;
         evvmID = _evvmID;
         vBlockNumber = 0;
+        nextTxId = 1; // Start transaction IDs at 1
     }
     
     // ============ Virtual Account Management ============
@@ -137,7 +157,7 @@ contract EVVMCore is Ownable {
     /// @param toVaddr Destination virtual account
     /// @param amount Encrypted handle of the amount (InEuint64)
     /// @param expectedNonce Nonce that the caller believes `fromVaddr` has
-    /// @return txId Transaction ID (temporary, will be properly stored in step 5)
+    /// @return txId Transaction ID (unique identifier for this transaction)
     function applyTransfer(
         bytes32 fromVaddr,
         bytes32 toVaddr,
@@ -178,14 +198,30 @@ contract EVVMCore is Ownable {
         fromAcc.nonce += 1;
         vBlockNumber += 1;
         
-        // Temporary txId (will be properly implemented in step 5)
-        txId = vBlockNumber; // Using block number as temporary ID
+        // Assign unique transaction ID
+        txId = nextTxId;
+        nextTxId += 1;
+        
+        // Store the transaction
+        virtualTransactions[txId] = VirtualTransaction({
+            fromVaddr: fromVaddr,
+            toVaddr: toVaddr,
+            amountEnc: amountEnc,
+            nonce: usedNonce,
+            vBlockNumber: vBlockNumber,
+            timestamp: block.timestamp,
+            exists: true
+        });
         
         // Permissions: contract and sender can operate/read the new balances
         FHE.allowThis(newFromBalance);
         FHE.allowThis(newToBalance);
         FHE.allowSender(newFromBalance);
         FHE.allowSender(newToBalance);
+        
+        // Permissions: allow contract and sender to read the stored transaction amount
+        FHE.allowThis(amountEnc);
+        FHE.allowSender(amountEnc);
         
         emit VirtualTransferApplied(
             fromVaddr,
@@ -221,5 +257,18 @@ contract EVVMCore is Ownable {
     function updateStateCommitment(bytes32 newCommitment) external {
         stateCommitment = newCommitment;
         emit StateCommitmentUpdated(newCommitment);
+    }
+    
+    // ============ Virtual Transaction Queries ============
+    
+    /// @notice Retrieves a virtual transaction by its ID
+    /// @param txId The transaction ID to query
+    /// @return tx The virtual transaction struct
+    /// @dev Returns a struct with all transaction details including encrypted amount
+    function getVirtualTransaction(
+        uint256 txId
+    ) external view returns (VirtualTransaction memory) {
+        require(virtualTransactions[txId].exists, "EVVM: transaction does not exist");
+        return virtualTransactions[txId];
     }
 }
