@@ -6,6 +6,1598 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
+    EVVMCafe: {
+      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_evvmAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_ownerOfShop",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint8",
+              name: "got",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "expected",
+              type: "uint8",
+            },
+          ],
+          name: "InvalidEncryptedInput",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "client",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "coffeeType",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "quantity",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "evvmNonce",
+              type: "uint64",
+            },
+          ],
+          name: "CoffeeOrdered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "euint64",
+              name: "amountEnc",
+              type: "uint256",
+            },
+          ],
+          name: "FundsWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          name: "coffeePrices",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "evvmCore",
+          outputs: [
+            {
+              internalType: "contract EVVMCore",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "client",
+              type: "address",
+            },
+          ],
+          name: "getClientBalance",
+          outputs: [
+            {
+              internalType: "euint64",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "coffeeType",
+              type: "string",
+            },
+          ],
+          name: "getCoffeePrice",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getShopBalance",
+          outputs: [
+            {
+              internalType: "euint64",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "client",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256",
+            },
+          ],
+          name: "isNonceUsed",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "isShopRegistered",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "clientAddress",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "coffeeType",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "quantity",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "totalPriceEnc",
+              type: "tuple",
+            },
+            {
+              internalType: "uint256",
+              name: "nonce",
+              type: "uint256",
+            },
+            {
+              internalType: "uint64",
+              name: "evvmNonce",
+              type: "uint64",
+            },
+          ],
+          name: "orderCoffee",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "ownerOfShop",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "initialBalance",
+              type: "tuple",
+            },
+          ],
+          name: "registerShopInEVVM",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "coffeeType",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+          ],
+          name: "setCoffeePrice",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "setShopOwner",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "amountEnc",
+              type: "tuple",
+            },
+          ],
+          name: "withdrawFunds",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
+    EVVMCore: {
+      address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "uint64",
+              name: "_vChainId",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "_evvmID",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint8",
+              name: "got",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "expected",
+              type: "uint8",
+            },
+          ],
+          name: "InvalidEncryptedInput",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "int32",
+              name: "value",
+              type: "int32",
+            },
+          ],
+          name: "SecurityZoneOutOfBounds",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "realAddress",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "AccountRegisteredFromAddress",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldEvvmID",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newEvvmID",
+              type: "uint256",
+            },
+          ],
+          name: "EvvmIDUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "euint64",
+              name: "amountAdded",
+              type: "uint256",
+            },
+          ],
+          name: "FaucetBalanceAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "bytes32",
+              name: "newCommitment",
+              type: "bytes32",
+            },
+          ],
+          name: "StateCommitmentUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "initialNonce",
+              type: "uint64",
+            },
+          ],
+          name: "VirtualAccountRegistered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint64",
+              name: "vBlockNumber",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "bytes32",
+              name: "stateCommitment",
+              type: "bytes32",
+            },
+          ],
+          name: "VirtualBlockCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "euint64",
+              name: "amountEnc",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "vBlockNumber",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "VirtualTransferApplied",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "amount",
+              type: "tuple",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "bool",
+              name: "incrementBlock",
+              type: "bool",
+            },
+          ],
+          name: "_applyTransferInternal",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "accountExists",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "addressToVaddr",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "amount",
+              type: "tuple",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+          ],
+          name: "applyTransfer",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              components: [
+                {
+                  internalType: "bytes32",
+                  name: "fromVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "toVaddr",
+                  type: "bytes32",
+                },
+                {
+                  components: [
+                    {
+                      internalType: "uint256",
+                      name: "ctHash",
+                      type: "uint256",
+                    },
+                    {
+                      internalType: "uint8",
+                      name: "securityZone",
+                      type: "uint8",
+                    },
+                    {
+                      internalType: "uint8",
+                      name: "utype",
+                      type: "uint8",
+                    },
+                    {
+                      internalType: "bytes",
+                      name: "signature",
+                      type: "bytes",
+                    },
+                  ],
+                  internalType: "struct InEuint64",
+                  name: "amount",
+                  type: "tuple",
+                },
+                {
+                  internalType: "uint64",
+                  name: "expectedNonce",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct EVVMCore.TransferParams[]",
+              name: "transfers",
+              type: "tuple[]",
+            },
+          ],
+          name: "applyTransferBatch",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "successfulTxs",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "failedTxs",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256[]",
+              name: "txIds",
+              type: "uint256[]",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "newCommitment",
+              type: "bytes32",
+            },
+          ],
+          name: "createVirtualBlock",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "blockNumber",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "evvmID",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "amount",
+              type: "tuple",
+            },
+          ],
+          name: "faucetAddBalance",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "realAddress",
+              type: "address",
+            },
+            {
+              internalType: "bytes32",
+              name: "salt",
+              type: "bytes32",
+            },
+          ],
+          name: "generateVaddrFromAddress",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "getAccount",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "euint64",
+                  name: "balance",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint64",
+                  name: "nonce",
+                  type: "uint64",
+                },
+                {
+                  internalType: "bool",
+                  name: "exists",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct EVVMCore.VirtualAccount",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint64",
+              name: "blockNumber",
+              type: "uint64",
+            },
+          ],
+          name: "getBlockInfo",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint64",
+                  name: "blockNumber",
+                  type: "uint64",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "stateCommitment",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "uint256",
+                  name: "timestamp",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "transactionCount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "exists",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct EVVMCore.VirtualBlock",
+              name: "blockInfo",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "getEncryptedBalance",
+          outputs: [
+            {
+              internalType: "euint64",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "getNonce",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "realAddress",
+              type: "address",
+            },
+          ],
+          name: "getVaddrFromAddress",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "getVirtualTransaction",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "bytes32",
+                  name: "fromVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "toVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "euint64",
+                  name: "amountEnc",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint64",
+                  name: "nonce",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "vBlockNumber",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint256",
+                  name: "timestamp",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "exists",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct EVVMCore.VirtualTransaction",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "nextTxId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "initialBalance",
+              type: "tuple",
+            },
+          ],
+          name: "registerAccount",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "realAddress",
+              type: "address",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "initialBalance",
+              type: "tuple",
+            },
+          ],
+          name: "registerAccountFromAddress",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "ctHash",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint8",
+                  name: "securityZone",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "utype",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct InEuint64",
+              name: "amount",
+              type: "tuple",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+          ],
+          name: "requestPay",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "newEvvmID",
+              type: "uint256",
+            },
+          ],
+          name: "setEvvmID",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "stateCommitment",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "newCommitment",
+              type: "bytes32",
+            },
+          ],
+          name: "updateStateCommitment",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "newCommitment",
+              type: "bytes32",
+            },
+          ],
+          name: "updateStateCommitmentAfterBatch",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "vBlockNumber",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "vChainId",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          name: "vaddrToAddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          name: "virtualBlocks",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "blockNumber",
+              type: "uint64",
+            },
+            {
+              internalType: "bytes32",
+              name: "stateCommitment",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint256",
+              name: "timestamp",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "transactionCount",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "exists",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "virtualTransactions",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "euint64",
+              name: "amountEnc",
+              type: "uint256",
+            },
+            {
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint64",
+              name: "vBlockNumber",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "timestamp",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "exists",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
     FHECounter: {
       address: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
       abi: [

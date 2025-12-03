@@ -8,15 +8,18 @@ import { Contract } from "ethers";
  * using the CoFHE SDK. For local testing, this can be done via the frontend
  * or a separate setup script with CoFHE SDK integration.
  *
- * Usage: yarn hardhat run scripts/setupEvvmCafe.ts --network localhost
+ * Usage: yarn workspace @se-2/hardhat hardhat run scripts/setupEvvmCafe.ts --network localhost
  */
 async function main() {
   const hre = await import("hardhat");
-  const { deployer } = await hre.getNamedAccounts();
+  const [deployer] = await hre.ethers.getSigners();
 
-  // Get deployed contracts
-  const evvmCafe = await hre.ethers.getContract<Contract>("EVVMCafe", deployer);
-  const evvmCore = await hre.ethers.getContract<Contract>("EVVMCore", deployer);
+  // Get deployed contracts using deployments
+  const evvmCafeDeployment = await hre.deployments.get("EVVMCafe");
+  const evvmCoreDeployment = await hre.deployments.get("EVVMCore");
+
+  const evvmCafe = await hre.ethers.getContractAt<Contract>("EVVMCafe", evvmCafeDeployment.address, deployer);
+  const evvmCore = await hre.ethers.getContractAt<Contract>("EVVMCore", evvmCoreDeployment.address, deployer);
 
   console.log("Setting up EVVMCafe...");
   console.log("EVVMCafe address:", await evvmCafe.getAddress());
