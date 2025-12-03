@@ -7,7 +7,36 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title EVVM Core - Virtual Blockchain with FHE
 /// @notice MVP of EVVM Core as "virtual blockchain" using FHE for private balances
-/// @dev Step 9: Admin functions and testing utilities
+/// @dev Step 13: Address-to-Vaddr compatibility layer
+/// 
+/// @dev This contract implements a minimal virtual blockchain with the following features:
+/// - Virtual accounts with encrypted balances (euint64)
+/// - Virtual transactions with nonce-based replay protection
+/// - Virtual block progression with state commitments
+/// - Batch transfer processing
+/// - Admin functions for testing and maintenance
+///
+/// @dev Usage Flow:
+/// 1. Deploy contract with vChainId and evvmID
+/// 2. Users register accounts with encrypted initial balances
+/// 3. Users perform transfers using encrypted amounts
+/// 4. State commitments are calculated off-chain and submitted on-chain
+/// 5. Virtual blocks track transaction history
+///
+/// @dev Limitations (MVP):
+/// - No signature validation (nonce-only replay protection)
+/// - No async nonces support (sequential nonces only)
+/// - State commitments must be calculated off-chain
+/// - No staking, rewards, or treasury functionality
+/// - No cross-chain bridge support
+///
+/// @dev Future Improvements:
+/// - EIP-712 signature validation for transactions
+/// - Async nonces for parallel transaction processing
+/// - On-chain state commitment calculation (if gas-efficient)
+/// - Staking and validator system
+/// - Treasury and fee management
+/// - Cross-chain bridge integration
 contract EVVMCore is Ownable {
     // ============ Structs ============
     
@@ -77,15 +106,31 @@ contract EVVMCore is Ownable {
     /// @dev Stores metadata about each virtual block
     mapping(uint64 => VirtualBlock) public virtualBlocks;
     
+    /// @notice Map of Ethereum addresses to virtual addresses
+    /// @dev Enables compatibility layer for traditional contracts
+    mapping(address => bytes32) public addressToVaddr;
+    
+    /// @notice Map of virtual addresses to Ethereum addresses (reverse mapping)
+    /// @dev Enables lookup of real address from virtual address
+    mapping(bytes32 => address) public vaddrToAddress;
+    
     // ============ Events ============
     
     /// @notice Emitted when a new virtual account is registered
+    /// @param vaddr The virtual address of the registered account
+    /// @param initialNonce The initial nonce (always 0 for new accounts)
     event VirtualAccountRegistered(
         bytes32 indexed vaddr,
         uint64 initialNonce
     );
     
     /// @notice Emitted when a virtual transaction is applied
+    /// @param fromVaddr The source virtual address
+    /// @param toVaddr The destination virtual address
+    /// @param amountEnc The encrypted amount transferred
+    /// @param nonce The nonce used in this transaction
+    /// @param vBlockNumber The virtual block number when the transaction was applied
+    /// @param txId The unique transaction ID
     event VirtualTransferApplied(
         bytes32 indexed fromVaddr,
         bytes32 indexed toVaddr,
@@ -96,21 +141,36 @@ contract EVVMCore is Ownable {
     );
     
     /// @notice Emitted when the virtual state commitment is updated
+    /// @param newCommitment The new state commitment (e.g., Merkle root)
     event StateCommitmentUpdated(bytes32 newCommitment);
     
     /// @notice Emitted when a virtual block is created
+    /// @param vBlockNumber The virtual block number
+    /// @param stateCommitment The state commitment for this block
     event VirtualBlockCreated(
         uint64 indexed vBlockNumber,
         bytes32 stateCommitment
     );
     
     /// @notice Emitted when the EVVM ID is updated
+    /// @param oldEvvmID The previous EVVM ID
+    /// @param newEvvmID The new EVVM ID
     event EvvmIDUpdated(uint256 oldEvvmID, uint256 newEvvmID);
     
     /// @notice Emitted when balance is added via faucet
+    /// @param vaddr The virtual address that received the balance
+    /// @param amountAdded The encrypted amount that was added
     event FaucetBalanceAdded(
         bytes32 indexed vaddr,
         euint64 amountAdded
+    );
+    
+    /// @notice Emitted when an account is registered from an Ethereum address
+    /// @param realAddress The Ethereum address that was registered
+    /// @param vaddr The generated virtual address
+    event AccountRegisteredFromAddress(
+        address indexed realAddress,
+        bytes32 indexed vaddr
     );
 
     // ============ Constructor ============
@@ -131,6 +191,10 @@ contract EVVMCore is Ownable {
     /// @param vaddr Virtual identifier of the account (pseudonym, not linked on-chain to real user)
     /// @param initialBalance Encrypted handle generated with CoFHE (InEuint64)
     /// @dev vaddr can be keccak256(pubkey), hash of real address, or any unique bytes32
+    /// @dev The account will be initialized with nonce 0 and the provided encrypted balance
+    /// @dev FHE permissions are automatically set for the contract and sender
+    /// @dev Reverts if the account already exists
+    /// @dev Emits VirtualAccountRegistered event
     function registerAccount(
         bytes32 vaddr,
         InEuint64 calldata initialBalance
@@ -191,12 +255,18 @@ contract EVVMCore is Ownable {
     
     /// @notice Applies a transfer within the virtual blockchain
     /// @dev Transaction model: (from, to, amount, nonce, chainId)
-    /// For MVP we don't validate signatures, only check nonce and existence
+    /// @dev For MVP we don't validate signatures, only check nonce and existence
+    /// @dev This function increments the virtual block number automatically
     /// @param fromVaddr Source virtual account
     /// @param toVaddr Destination virtual account
     /// @param amount Encrypted handle of the amount (InEuint64)
     /// @param expectedNonce Nonce that the caller believes `fromVaddr` has
     /// @return txId Transaction ID (unique identifier for this transaction)
+    /// @dev Reverts if:
+    ///      - Source or destination account doesn't exist
+    ///      - Nonce doesn't match the account's current nonce
+    /// @dev Emits VirtualTransferApplied event
+    /// @dev Updates virtual block number and stores transaction
     function applyTransfer(
         bytes32 fromVaddr,
         bytes32 toVaddr,
@@ -352,7 +422,10 @@ contract EVVMCore is Ownable {
     /// @notice Updates the state commitment without creating a new block
     /// @dev Useful for updating the commitment when state changes occur
     /// @dev Validates that the commitment is not empty
-    /// @param newCommitment The new state commitment
+    /// @dev Updates the current block's commitment if it exists
+    /// @param newCommitment The new state commitment (must not be bytes32(0))
+    /// @dev Reverts if newCommitment is zero
+    /// @dev Emits StateCommitmentUpdated event
     function updateStateCommitment(bytes32 newCommitment) external {
         // Validation: commitment should not be empty
         require(newCommitment != bytes32(0), "EVVM: commitment cannot be zero");
@@ -422,10 +495,14 @@ contract EVVMCore is Ownable {
     
     /// @notice Processes multiple transfers in a single virtual block
     /// @dev All successful transfers are grouped into one virtual block. Failed transfers are skipped.
+    /// @dev This function uses try/catch to handle individual transfer failures gracefully
+    /// @dev If all transfers fail, the block number increment is reverted
     /// @param transfers Array of transfer parameters to process
     /// @return successfulTxs Number of successfully processed transfers
     /// @return failedTxs Number of failed transfers
     /// @return txIds Array of transaction IDs for successful transfers (0 for failed ones)
+    /// @dev Reverts if the transfers array is empty
+    /// @dev Each successful transfer emits a VirtualTransferApplied event
     function applyTransferBatch(
         TransferParams[] calldata transfers
     ) external returns (
@@ -557,5 +634,84 @@ contract EVVMCore is Ownable {
         
         // Emit event
         emit FaucetBalanceAdded(vaddr, amountEnc);
+    }
+    
+    // ============ Address-to-Vaddr Compatibility Layer ============
+    
+    /// @notice Registers a new account from an Ethereum address (convenience function)
+    /// @dev Automatically generates vaddr from the Ethereum address using vChainId and evvmID
+    /// @dev This function creates a mapping between the real address and the generated vaddr
+    /// @param realAddress The Ethereum address to register
+    /// @param initialBalance Encrypted handle generated with CoFHE (InEuint64)
+    /// @dev Reverts if the account already exists (either by address or by generated vaddr)
+    /// @dev Emits AccountRegisteredFromAddress event
+    function registerAccountFromAddress(
+        address realAddress,
+        InEuint64 calldata initialBalance
+    ) external {
+        // Generate vaddr deterministically from address, vChainId, and evvmID
+        bytes32 vaddr = keccak256(abi.encodePacked(realAddress, vChainId, evvmID));
+        
+        // Check if account already exists
+        require(!accounts[vaddr].exists, "EVVM: account already exists");
+        
+        // Check if address is already mapped (shouldn't happen if vaddr doesn't exist, but double-check)
+        require(addressToVaddr[realAddress] == bytes32(0), "EVVM: address already registered");
+        
+        // Create mappings
+        addressToVaddr[realAddress] = vaddr;
+        vaddrToAddress[vaddr] = realAddress;
+        
+        // Register the account (replicate registerAccount logic)
+        euint64 balance = FHE.asEuint64(initialBalance);
+        
+        VirtualAccount storage acc = accounts[vaddr];
+        acc.balance = balance;
+        acc.nonce = 0;
+        acc.exists = true;
+        
+        // Allow this contract to operate on the balance
+        FHE.allowThis(balance);
+        // Optional: allow sender to read/use the balance
+        FHE.allowSender(balance);
+        
+        // Emit both events
+        emit VirtualAccountRegistered(vaddr, 0);
+        emit AccountRegisteredFromAddress(realAddress, vaddr);
+    }
+    
+    /// @notice Gets the virtual address for a given Ethereum address
+    /// @param realAddress The Ethereum address to query
+    /// @return vaddr The virtual address associated with the Ethereum address, or bytes32(0) if not registered
+    /// @dev Returns bytes32(0) if the address has not been registered via registerAccountFromAddress()
+    function getVaddrFromAddress(address realAddress) external view returns (bytes32) {
+        return addressToVaddr[realAddress];
+    }
+    
+    /// @notice Compatibility function to request payment using Ethereum addresses instead of vaddr
+    /// @dev This function bridges the gap between traditional contracts and the virtual blockchain
+    /// @dev It looks up the vaddr for each address and calls applyTransfer()
+    /// @param from The Ethereum address of the sender
+    /// @param to The Ethereum address of the recipient
+    /// @param amount Encrypted handle of the amount (InEuint64)
+    /// @param expectedNonce Nonce that the caller believes the sender's account has
+    /// @return txId Transaction ID (unique identifier for this transaction)
+    /// @dev Reverts if either address is not registered
+    /// @dev Reverts with the same errors as applyTransfer() (bad nonce, account missing, etc.)
+    function requestPay(
+        address from,
+        address to,
+        InEuint64 calldata amount,
+        uint64 expectedNonce
+    ) external returns (uint256 txId) {
+        bytes32 fromVaddr = addressToVaddr[from];
+        bytes32 toVaddr = addressToVaddr[to];
+        
+        require(fromVaddr != bytes32(0), "EVVM: from address not registered");
+        require(toVaddr != bytes32(0), "EVVM: to address not registered");
+        
+        // Call applyTransfer (it's defined earlier in the contract, so direct call should work)
+        // Using internal call by duplicating the logic or calling via this
+        return this.applyTransfer(fromVaddr, toVaddr, amount, expectedNonce);
     }
 }
