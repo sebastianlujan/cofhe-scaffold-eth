@@ -32,6 +32,8 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/no-unused-vars": "error",
       "@typescript-eslint/no-explicit-any": "off",
+      // Allow require() in scripts (needed for Hardhat runtime environment)
+      "@typescript-eslint/no-require-imports": "off",
 
       "prettier/prettier": [
         "warn",
