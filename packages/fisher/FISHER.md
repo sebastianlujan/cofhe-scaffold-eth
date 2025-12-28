@@ -24,15 +24,16 @@ yarn dev:relayer
 ## Architecture
 
 ```
-User (Frontend)                    Fisher Relayer              Smart Contract
-     |                                  |                           |
-     |-- 1. Sign EIP-712 (NO GAS) ---->|                           |
-     |                                  |                           |
-     |-- 2. POST /order --------------->|                           |
-     |                                  |-- 3. Execute tx (PAY GAS)->|
-     |                                  |                           |
-     |                                  |<-- 4. Tx receipt ---------|
-     |<-- 5. Success response ---------|                           |
+sequenceDiagram
+    participant User as User (Frontend)
+    participant Relayer as Fisher Relayer
+    participant Contract as Smart Contract
+
+    User->>Relayer: 1. Sign EIP-191 (NO GAS)
+    User->>Relayer: 2. POST /order
+    Relayer->>Contract: 3. Execute tx (PAY GAS)
+    Contract-->>Relayer: 4. Tx receipt
+    Relayer-->>User: 5. Success response
 ```
 
 ## Startup Order

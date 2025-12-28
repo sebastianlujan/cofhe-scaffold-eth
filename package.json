@@ -33,7 +33,8 @@
 		"build": "yarn workspace @se-2/nextjs build",
 		"postinstall": "husky install",
 		"next:lint": "yarn workspace @se-2/nextjs lint",
-		"next:check-types": "yarn workspace @se-2/nextjs check-types"
+		"next:check-types": "yarn workspace @se-2/nextjs check-types",
+		"hardhat:lint-staged": "yarn workspace @se-2/hardhat lint-staged"
 	},
 	"devDependencies": {
 		"husky": "~9.1.6",
