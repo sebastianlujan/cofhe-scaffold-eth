@@ -233,5 +233,3 @@ await evvmCore.updateStateCommitmentAfterBatch(commitment);
 - [EVVM Core Contract](../packages/hardhat/contracts/core/EVVM.core.sol)
 - [State Commitment Utility](../packages/hardhat/utils/stateCommitment.ts)
 - [Calculation Script](../packages/hardhat/scripts/calculateStateCommitment.ts)
-- [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md#step-4b-state-commitment-calculation-off-chain)
-

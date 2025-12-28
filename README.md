@@ -1,10 +1,8 @@
-# EVVM - Encrypted Virtual Value Machine
-
-A privacy-preserving payment system built with Fully Homomorphic Encryption (FHE) using Zama's FHEVM on Ethereum.
+# EVVM - Encrypted Virtual Virtual Machine
 
 ## Overview
 
-EVVM (Encrypted Virtual Value Machine) is a virtual blockchain layer that enables private payments with encrypted balances. It provides:
+EVVM (Encrypted Virtual Virtual Machine) is a virtual layer that enables private payments with encrypted balances. It provides:
 
 - **Private Balances**: Account balances are encrypted using FHE - no one can see how much you have
 - **Private Transfers**: Transfer amounts are encrypted - observers only see that a transfer occurred
@@ -14,18 +12,28 @@ EVVM (Encrypted Virtual Value Machine) is a virtual blockchain layer that enable
 
 ## Architecture
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture diagrams.
+
 ```
-contracts/
-├── core/
-│   └── EVVMCore.sol           # Main contract: accounts, transfers, blocks
-├── interfaces/
-│   ├── IEVVMCore.sol          # Core interface definitions
-│   ├── IEVVMSignedTransfers.sol
-│   └── IEVVMSecureTransfers.sol
-├── periphery/
-│   └── EVVMSignatureVerifier.sol  # Signature verification library
-└── examples/
-    └── EVVMCafe.sol           # Example integration (coffee shop)
+packages/
+├── hardhat/                   # Smart contracts & deployment
+│   └── contracts/
+│       ├── core/
+│       │   └── EVVM.core.sol          # FHE payment engine
+│       ├── examples/
+│       │   ├── EVVMCafe.sol           # Coffee shop integration
+│       │   └── EVVMCafeGasless.sol    # Gasless coffee shop
+│       └── library/
+│           └── FheEvvmService.sol     # Base service contract
+├── nextjs/                    # Frontend application
+│   └── hooks/evvm/
+│       └── useGaslessOrder.ts         # Gasless order hook
+├── fisher/                    # Fisher relayer service (NestJS)
+│   └── src/
+│       ├── order/                     # Order processing
+│       └── blockchain/                # Contract interactions
+└── cli/
+    └── evvm.js                # CLI tool
 ```
 
 ## Quick Start
@@ -49,16 +57,38 @@ yarn install
 
 ### Local Development
 
+**Startup Order:** chain -> deploy -> relayer -> frontend
+
+#### Quick Start (Recommended)
+
 ```bash
-# Terminal 1: Start local Hardhat node
-yarn chain
+# Sepolia development (relayer + frontend)
+yarn dev
 
-# Terminal 2: Deploy contracts
-cd packages/hardhat
-npx hardhat deploy --network localhost
+# Full local development (chain + deploy + relayer + frontend)
+yarn dev:all
 
-# Terminal 3: Start frontend (optional)
-yarn start
+# Check status of all services
+yarn dev:status
+
+# See all available commands
+yarn evvm help
+```
+
+#### Manual Setup (Separate Terminals)
+
+```bash
+# Terminal 1: Start local Hardhat chain
+yarn dev:chain
+
+# Terminal 2: Deploy contracts (after chain is ready)
+yarn dev:deploy
+
+# Terminal 3: Start relayer
+yarn dev:relayer
+
+# Terminal 4: Start frontend
+yarn dev:frontend
 ```
 
 ### Run Tests
@@ -98,6 +128,39 @@ npx hardhat deploy --network sepolia
 # 4. Run real FHE tests
 npx hardhat test test/e2e/EVVMCore.sepolia.test.ts --network sepolia
 ```
+
+## CLI Commands
+
+The EVVM CLI provides a unified interface for managing all services.
+
+**Startup Order:** chain -> deploy -> relayer -> frontend
+
+### Combined Commands
+
+| Command | Description |
+|---------|-------------|
+| `yarn dev` | Start relayer + frontend (for Sepolia) |
+| `yarn dev:all` | Start chain + deploy + relayer + frontend (local) |
+
+### Individual Commands
+
+| Command | Description |
+|---------|-------------|
+| `yarn dev:chain` | Start local hardhat chain |
+| `yarn dev:deploy` | Deploy contracts |
+| `yarn dev:relayer` | Start fisher relayer |
+| `yarn dev:frontend` | Start frontend |
+| `yarn dev:status` | Check status of all services |
+| `yarn evvm help` | Show help message |
+
+### Service Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend | 3000 | http://localhost:3000 |
+| Fisher Relayer | 3001 | http://localhost:3001 |
+| Hardhat Chain | 8545 | http://localhost:8545 |
+| Gasless Cafe | 3000 | http://localhost:3000/evvm-cafe-gasless |
 
 ## Core Concepts
 
@@ -152,8 +215,7 @@ evvmCore.applySignedTransfer(
 );
 ```
 
-#### 3. Secure Transfer (Plan 2A - two-phase with FHE secret)
-
+#### 3. Secure Transfer
 ```solidity
 // Phase 1: Set up account secret (one-time)
 evvmCore.setAccountSecret(vaddr, encryptedSecret, secretProof);

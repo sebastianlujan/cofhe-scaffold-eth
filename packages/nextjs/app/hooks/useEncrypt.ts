@@ -27,9 +27,9 @@ export type EncryptValueType =
   | { type: "address"; value: string };
 
 export interface UseEncryptResult {
-  encrypt: (contractAddress: string, values: EncryptValueType[]) => Promise<EncryptedInput | null>;
-  encryptUint64: (contractAddress: string, value: bigint) => Promise<EncryptedInput | null>;
-  encryptUint32: (contractAddress: string, value: bigint) => Promise<EncryptedInput | null>;
+  encrypt: (contractAddress: string, values: EncryptValueType[], userAddress?: string) => Promise<EncryptedInput | null>;
+  encryptUint64: (contractAddress: string, value: bigint, userAddress?: string) => Promise<EncryptedInput | null>;
+  encryptUint32: (contractAddress: string, value: bigint, userAddress?: string) => Promise<EncryptedInput | null>;
   isEncrypting: boolean;
   error: string | null;
   encryptionDisabled: boolean;
@@ -54,14 +54,17 @@ export function useEncrypt(): UseEncryptResult {
   const [error, setError] = useState<string | null>(null);
 
   const encrypt = useCallback(
-    async (contractAddress: string, values: EncryptValueType[]): Promise<EncryptedInput | null> => {
+    async (contractAddress: string, values: EncryptValueType[], userAddress?: string): Promise<EncryptedInput | null> => {
       if (!instance || !isInitialized) {
         setError("FHEVM not initialized");
         return null;
       }
 
-      if (!address) {
-        setError("Wallet not connected");
+      // Use provided userAddress or fall back to connected wallet
+      const targetUserAddress = userAddress || address;
+      
+      if (!targetUserAddress) {
+        setError("Wallet not connected and no userAddress provided");
         return null;
       }
 
@@ -70,11 +73,12 @@ export function useEncrypt(): UseEncryptResult {
 
       try {
         console.log("[Encrypt] Creating encrypted input for contract:", contractAddress);
-        console.log("[Encrypt] User address:", address);
+        console.log("[Encrypt] User address:", targetUserAddress);
         console.log("[Encrypt] Values:", values);
 
         // Create encrypted input buffer bound to contract and user
-        const buffer = instance.createEncryptedInput(contractAddress, address);
+        // For cross-contract calls (e.g., gasless), userAddress should be the contract that calls FHE.asEuint64
+        const buffer = instance.createEncryptedInput(contractAddress, targetUserAddress);
 
         // Add all values to the buffer
         for (const val of values) {
@@ -136,14 +140,18 @@ export function useEncrypt(): UseEncryptResult {
   );
 
   // Convenience method for uint64 (most common for balances)
+  // userAddress: For cross-contract FHE calls, pass the contract that will call FHE.asEuint64
   const encryptUint64 = useCallback(
-    (contractAddress: string, value: bigint) => encrypt(contractAddress, [{ type: "uint64", value }]),
+    (contractAddress: string, value: bigint, userAddress?: string) => 
+      encrypt(contractAddress, [{ type: "uint64", value }], userAddress),
     [encrypt],
   );
 
   // Convenience method for uint32 (for counter)
+  // userAddress: For cross-contract FHE calls, pass the contract that will call FHE.asEuint64
   const encryptUint32 = useCallback(
-    (contractAddress: string, value: bigint) => encrypt(contractAddress, [{ type: "uint32", value }]),
+    (contractAddress: string, value: bigint, userAddress?: string) => 
+      encrypt(contractAddress, [{ type: "uint32", value }], userAddress),
     [encrypt],
   );
 

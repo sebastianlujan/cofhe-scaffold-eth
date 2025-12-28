@@ -256,7 +256,7 @@ describe("EVVMCore - E2E Private Payments", function () {
      *    - Balance updates happen in encrypted domain
      *    - FHE.add() and FHE.sub() operate on ciphertexts
      *
-     * 5. Conditional Execution (Plan 2A):
+     * 5. Conditional Execution
      *    - FHE.select() creates zero amount if secret invalid
      *    - Attacker cannot tell if their attack succeeded
      */
@@ -318,7 +318,6 @@ describe("EVVMCore - E2E Private Payments", function () {
       console.log("1. Alice vaddr:", aliceVaddr);
       console.log("2. Bob vaddr:", bobVaddr);
 
-      // STEP 2: In real usage, Alice would:
       // const fhevm = await getFHEVM();
       // const encryptedBalance = await fhevm.createEncryptedInput(evvmCore.address, alice.address)
       //   .add64(1000n)
@@ -326,11 +325,7 @@ describe("EVVMCore - E2E Private Payments", function () {
       // await evvmCore.registerAccountFromAddress(alice.address, encryptedBalance.handles[0], encryptedBalance.inputProof);
 
       console.log("3. Alice registers with encrypted initial balance (1000)");
-
-      // STEP 3: Bob registers similarly
       console.log("4. Bob registers with encrypted initial balance (500)");
-
-      // STEP 4: Alice creates a signed transfer
       const deadline = futureTimestamp(300);
       const amountHandle = mockEncryptedHandle(200n);
 
@@ -346,11 +341,9 @@ describe("EVVMCore - E2E Private Payments", function () {
       console.log("   - r:", signature.r.slice(0, 20) + "...");
       console.log("   - s:", signature.s.slice(0, 20) + "...");
 
-      // STEP 5: In real usage:
       // await evvmCore.applySignedTransfer(aliceVaddr, bobVaddr, amountHandle, inputProof, 0n, deadline, signature);
       console.log("7. Signed transfer submitted to contract");
 
-      // STEP 6: Result
       console.log("8. Expected result:");
       console.log("   - Alice balance: 1000 - 200 = 800 (encrypted)");
       console.log("   - Bob balance: 500 + 200 = 700 (encrypted)");
