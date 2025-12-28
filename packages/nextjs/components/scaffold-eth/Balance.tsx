@@ -33,18 +33,15 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   if (!address || isLoading || balance === null || (isNativeCurrencyPriceFetching && nativeCurrencyPrice === 0)) {
     return (
       <div className="animate-pulse flex space-x-4">
-        <div className="rounded-md bg-slate-300 h-6 w-6"></div>
-        <div className="flex items-center space-y-6">
-          <div className="h-2 w-28 bg-slate-300 rounded-sm"></div>
-        </div>
+        <div className="rounded-md bg-white/30 h-5 w-16"></div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="border-2 border-base-content/30 rounded-md px-2 flex flex-col items-center max-w-fit cursor-pointer">
-        <div className="text-warning">Error</div>
+      <div className={`text-sm ${className}`}>
+        <span className="text-red-400">Error</span>
       </div>
     );
   }
@@ -53,23 +50,21 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
 
   return (
     <button
-      className={`btn btn-sm btn-ghost flex flex-col font-normal items-center hover:bg-transparent ${className}`}
+      className={`flex items-center gap-1 text-sm hover:opacity-80 transition-opacity ${className}`}
       onClick={toggleDisplayUsdMode}
       type="button"
     >
-      <div className="w-full flex items-center justify-center">
-        {displayUsdMode ? (
-          <>
-            <span className="text-[0.8em] font-bold mr-1">$</span>
-            <span>{(formattedBalance * nativeCurrencyPrice).toFixed(2)}</span>
-          </>
-        ) : (
-          <>
-            <span>{formattedBalance.toFixed(4)}</span>
-            <span className="text-[0.8em] font-bold ml-1">{targetNetwork.nativeCurrency.symbol}</span>
-          </>
-        )}
-      </div>
+      {displayUsdMode ? (
+        <>
+          <span className="font-medium">$</span>
+          <span className="font-medium">{(formattedBalance * nativeCurrencyPrice).toFixed(2)}</span>
+        </>
+      ) : (
+        <>
+          <span className="font-medium">{formattedBalance.toFixed(4)}</span>
+          <span className="font-medium">{targetNetwork.nativeCurrency.symbol}</span>
+        </>
+      )}
     </button>
   );
 };

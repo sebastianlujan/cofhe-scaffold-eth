@@ -49,42 +49,45 @@ export const AddressInfoDropdown = ({
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
-          <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
-          <span className="ml-2 mr-1">
+        <summary className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer transition-colors">
+          <BlockieAvatar address={checkSumAddress} size={24} ensImage={ensAvatar} />
+          <span className="text-white text-sm font-medium">
             {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
           </span>
-          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+          <ChevronDownIcon className="h-4 w-4 text-white/60" />
         </summary>
-        <ul className="dropdown-content menu z-2 p-2 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1">
+        <ul className="dropdown-content menu z-50 p-2 mt-2 shadow-lg bg-white border border-gray-200 rounded-xl gap-1 min-w-[200px]">
           <NetworkOptions hidden={!selectingNetwork} />
           <li className={selectingNetwork ? "hidden" : ""}>
             <div
-              className="h-8 btn-sm rounded-xl! flex gap-3 py-3 cursor-pointer"
+              className="h-8 btn-sm rounded-lg! flex gap-3 py-3 cursor-pointer text-gray-700 hover:bg-gray-100"
               onClick={() => copyAddressToClipboard(checkSumAddress)}
             >
               {isAddressCopiedToClipboard ? (
                 <>
-                  <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <CheckCircleIcon className="h-5 w-5 text-green-500" aria-hidden="true" />
                   <span className="whitespace-nowrap">Copied!</span>
                 </>
               ) : (
                 <>
-                  <DocumentDuplicateIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <DocumentDuplicateIcon className="h-5 w-5" aria-hidden="true" />
                   <span className="whitespace-nowrap">Copy address</span>
                 </>
               )}
             </div>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <label htmlFor="qrcode-modal" className="h-8 btn-sm rounded-xl! flex gap-3 py-3">
-              <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <label
+              htmlFor="qrcode-modal"
+              className="h-8 btn-sm rounded-lg! flex gap-3 py-3 text-gray-700 hover:bg-gray-100"
+            >
+              <QrCodeIcon className="h-5 w-5" />
               <span className="whitespace-nowrap">View QR Code</span>
             </label>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <button className="h-8 btn-sm rounded-xl! flex gap-3 py-3" type="button">
-              <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <button className="h-8 btn-sm rounded-lg! flex gap-3 py-3 text-gray-700 hover:bg-gray-100" type="button">
+              <ArrowTopRightOnSquareIcon className="h-5 w-5" />
               <a
                 target="_blank"
                 href={blockExplorerAddressLink}
@@ -98,23 +101,23 @@ export const AddressInfoDropdown = ({
           {allowedNetworks.length > 1 ? (
             <li className={selectingNetwork ? "hidden" : ""}>
               <button
-                className="h-8 btn-sm rounded-xl! flex gap-3 py-3"
+                className="h-8 btn-sm rounded-lg! flex gap-3 py-3 text-gray-700 hover:bg-gray-100"
                 type="button"
                 onClick={() => {
                   setSelectingNetwork(true);
                 }}
               >
-                <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
+                <ArrowsRightLeftIcon className="h-5 w-5" /> <span>Switch Network</span>
               </button>
             </li>
           ) : null}
           <li className={selectingNetwork ? "hidden" : ""}>
             <button
-              className="menu-item text-error h-8 btn-sm rounded-xl! flex gap-3 py-3"
+              className="h-8 btn-sm rounded-lg! flex gap-3 py-3 text-red-500 hover:bg-red-50"
               type="button"
               onClick={() => disconnect()}
             >
-              <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" /> <span>Disconnect</span>
             </button>
           </li>
         </ul>

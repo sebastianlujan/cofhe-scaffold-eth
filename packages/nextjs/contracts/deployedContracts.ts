@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     EVVMCafe: {
-      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      address: "0x40a42Baf86Fc821f972Ad2aC878729063CeEF403",
       abi: [
         {
           inputs: [
@@ -24,22 +24,6 @@ const deployedContracts = {
           ],
           stateMutability: "nonpayable",
           type: "constructor",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint8",
-              name: "got",
-              type: "uint8",
-            },
-            {
-              internalType: "uint8",
-              name: "expected",
-              type: "uint8",
-            },
-          ],
-          name: "InvalidEncryptedInput",
-          type: "error",
         },
         {
           inputs: [
@@ -61,6 +45,11 @@ const deployedContracts = {
             },
           ],
           name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ShopAlreadyRegistered",
           type: "error",
         },
         {
@@ -107,7 +96,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           name: "FundsWithdrawn",
@@ -177,7 +166,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -209,7 +198,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -270,31 +259,9 @@ const deployedContracts = {
               type: "uint256",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
-              name: "totalPriceEnc",
-              type: "tuple",
+              internalType: "uint256",
+              name: "paymentTxId",
+              type: "uint256",
             },
             {
               internalType: "uint256",
@@ -303,7 +270,7 @@ const deployedContracts = {
             },
             {
               internalType: "uint64",
-              name: "evvmNonce",
+              name: "expectedNonce",
               type: "uint64",
             },
           ],
@@ -341,31 +308,14 @@ const deployedContracts = {
         {
           inputs: [
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerShopInEVVM",
@@ -432,31 +382,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amountEnc",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "withdrawFunds",
@@ -472,7 +405,7 @@ const deployedContracts = {
       },
     },
     EVVMCore: {
-      address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      address: "0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE",
       abi: [
         {
           inputs: [
@@ -491,19 +424,30 @@ const deployedContracts = {
           type: "constructor",
         },
         {
+          inputs: [],
+          name: "ECDSAInvalidSignature",
+          type: "error",
+        },
+        {
           inputs: [
             {
-              internalType: "uint8",
-              name: "got",
-              type: "uint8",
-            },
-            {
-              internalType: "uint8",
-              name: "expected",
-              type: "uint8",
+              internalType: "uint256",
+              name: "length",
+              type: "uint256",
             },
           ],
-          name: "InvalidEncryptedInput",
+          name: "ECDSAInvalidSignatureLength",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "s",
+              type: "bytes32",
+            },
+          ],
+          name: "ECDSAInvalidSignatureS",
           type: "error",
         },
         {
@@ -529,17 +473,6 @@ const deployedContracts = {
           type: "error",
         },
         {
-          inputs: [
-            {
-              internalType: "int32",
-              name: "value",
-              type: "int32",
-            },
-          ],
-          name: "SecurityZoneOutOfBounds",
-          type: "error",
-        },
-        {
           anonymous: false,
           inputs: [
             {
@@ -556,6 +489,25 @@ const deployedContracts = {
             },
           ],
           name: "AccountRegisteredFromAddress",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "enabled",
+              type: "bool",
+            },
+          ],
+          name: "AccountSecretUpdated",
           type: "event",
         },
         {
@@ -590,7 +542,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountAdded",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           name: "FaucetBalanceAdded",
@@ -613,6 +565,142 @@ const deployedContracts = {
             },
           ],
           name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "reason",
+              type: "string",
+            },
+          ],
+          name: "SecureTransferCancelled",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "SecureTransferCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "challengeExpiry",
+              type: "uint256",
+            },
+          ],
+          name: "SecureTransferRequested",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "signer",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "SignedTransferApplied",
           type: "event",
         },
         {
@@ -685,7 +773,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
             {
               indexed: false,
@@ -710,6 +798,45 @@ const deployedContracts = {
           type: "event",
         },
         {
+          inputs: [],
+          name: "CHALLENGE_EXPIRY",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "EVVM_DOMAIN",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "SIGNATURE_VERSION",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "bytes32",
@@ -722,31 +849,14 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -821,31 +931,80 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
               components: [
                 {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
                   internalType: "uint8",
-                  name: "securityZone",
+                  name: "v",
                   type: "uint8",
                 },
                 {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
                 },
               ],
-              internalType: "struct InEuint64",
-              name: "amount",
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
               type: "tuple",
+            },
+          ],
+          name: "applySignedTransfer",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -879,31 +1038,14 @@ const deployedContracts = {
                   type: "bytes32",
                 },
                 {
-                  components: [
-                    {
-                      internalType: "uint256",
-                      name: "ctHash",
-                      type: "uint256",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "securityZone",
-                      type: "uint8",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "utype",
-                      type: "uint8",
-                    },
-                    {
-                      internalType: "bytes",
-                      name: "signature",
-                      type: "bytes",
-                    },
-                  ],
-                  internalType: "struct InEuint64",
+                  internalType: "externalEuint64",
                   name: "amount",
-                  type: "tuple",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes",
+                  name: "inputProof",
+                  type: "bytes",
                 },
                 {
                   internalType: "uint64",
@@ -941,6 +1083,48 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          name: "cancelSecureTransfer",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "secret",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "secretProof",
+              type: "bytes",
+            },
+          ],
+          name: "completeSecureTransfer",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
               name: "newCommitment",
               type: "bytes32",
             },
@@ -953,6 +1137,32 @@ const deployedContracts = {
               type: "uint64",
             },
           ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "disableAccountSecret",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "enableAccountSecret",
+          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
@@ -977,36 +1187,38 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "faucetAddBalance",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          name: "fheSecretEnabled",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -1048,7 +1260,7 @@ const deployedContracts = {
                 {
                   internalType: "euint64",
                   name: "balance",
-                  type: "uint256",
+                  type: "bytes32",
                 },
                 {
                   internalType: "uint64",
@@ -1128,7 +1340,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -1148,6 +1360,111 @@ const deployedContracts = {
               internalType: "uint64",
               name: "",
               type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          name: "getSecureTransferChallenge",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "bytes32",
+                  name: "fromVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "toVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "externalEuint64",
+                  name: "amount",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes",
+                  name: "inputProof",
+                  type: "bytes",
+                },
+                {
+                  internalType: "uint64",
+                  name: "expectedNonce",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint256",
+                  name: "deadline",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "challengeExpiry",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "challengeHash",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bool",
+                  name: "exists",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct EVVMCore.SecureTransferChallenge",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "amountCommitment",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+          ],
+          name: "getTransferMessageHash",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -1197,7 +1514,7 @@ const deployedContracts = {
                 {
                   internalType: "euint64",
                   name: "amountEnc",
-                  type: "uint256",
+                  type: "bytes32",
                 },
                 {
                   internalType: "uint64",
@@ -1223,6 +1540,25 @@ const deployedContracts = {
               internalType: "struct EVVMCore.VirtualTransaction",
               name: "",
               type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "hasSecretEnabled",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
             },
           ],
           stateMutability: "view",
@@ -1258,35 +1594,90 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          name: "pendingSecureTransfers",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "challengeExpiry",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes32",
+              name: "challengeHash",
+              type: "bytes32",
+            },
+            {
+              internalType: "bool",
+              name: "exists",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "protocolId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "pure",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
               name: "vaddr",
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerAccount",
@@ -1302,31 +1693,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerAccountFromAddress",
@@ -1354,31 +1728,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -1394,6 +1751,161 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint8",
+                  name: "v",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
+                },
+              ],
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
+              type: "tuple",
+            },
+          ],
+          name: "requestPaySigned",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint8",
+                  name: "v",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
+                },
+              ],
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
+              type: "tuple",
+            },
+          ],
+          name: "requestSecureTransfer",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "secret",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+          ],
+          name: "setAccountSecret",
+          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
@@ -1569,7 +2081,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
             {
               internalType: "uint64",
@@ -1699,7 +2211,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Multicall3: {
-      address: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      address: "0x720472c8ce72c2A2D711333e064ABD3E6BbEAdd3",
       abi: [
         {
           inputs: [
@@ -2145,7 +2657,7 @@ const deployedContracts = {
   },
   11155111: {
     EVVMCafe: {
-      address: "0x9e780309645D9898782282Fd95E64f24D7637324",
+      address: "0x9f6430f2828999D51ea516299a44111cA71d604c",
       abi: [
         {
           inputs: [
@@ -2162,22 +2674,6 @@ const deployedContracts = {
           ],
           stateMutability: "nonpayable",
           type: "constructor",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint8",
-              name: "got",
-              type: "uint8",
-            },
-            {
-              internalType: "uint8",
-              name: "expected",
-              type: "uint8",
-            },
-          ],
-          name: "InvalidEncryptedInput",
-          type: "error",
         },
         {
           inputs: [
@@ -2250,7 +2746,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           name: "FundsWithdrawn",
@@ -2320,7 +2816,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -2352,7 +2848,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -2462,31 +2958,14 @@ const deployedContracts = {
         {
           inputs: [
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerShopInEVVM",
@@ -2553,31 +3032,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amountEnc",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "withdrawFunds",
@@ -2593,7 +3055,7 @@ const deployedContracts = {
       },
     },
     EVVMCore: {
-      address: "0xf239a3D5B22e416aF1183824c264caa25097300e",
+      address: "0x2a0D846e689D0d63A5dCeED4Eb695Eca5518145D",
       abi: [
         {
           inputs: [
@@ -2612,19 +3074,30 @@ const deployedContracts = {
           type: "constructor",
         },
         {
+          inputs: [],
+          name: "ECDSAInvalidSignature",
+          type: "error",
+        },
+        {
           inputs: [
             {
-              internalType: "uint8",
-              name: "got",
-              type: "uint8",
-            },
-            {
-              internalType: "uint8",
-              name: "expected",
-              type: "uint8",
+              internalType: "uint256",
+              name: "length",
+              type: "uint256",
             },
           ],
-          name: "InvalidEncryptedInput",
+          name: "ECDSAInvalidSignatureLength",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "s",
+              type: "bytes32",
+            },
+          ],
+          name: "ECDSAInvalidSignatureS",
           type: "error",
         },
         {
@@ -2650,14 +3123,8 @@ const deployedContracts = {
           type: "error",
         },
         {
-          inputs: [
-            {
-              internalType: "int32",
-              name: "value",
-              type: "int32",
-            },
-          ],
-          name: "SecurityZoneOutOfBounds",
+          inputs: [],
+          name: "ZamaProtocolUnsupported",
           type: "error",
         },
         {
@@ -2677,6 +3144,25 @@ const deployedContracts = {
             },
           ],
           name: "AccountRegisteredFromAddress",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "enabled",
+              type: "bool",
+            },
+          ],
+          name: "AccountSecretUpdated",
           type: "event",
         },
         {
@@ -2711,7 +3197,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountAdded",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           name: "FaucetBalanceAdded",
@@ -2734,6 +3220,142 @@ const deployedContracts = {
             },
           ],
           name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "reason",
+              type: "string",
+            },
+          ],
+          name: "SecureTransferCancelled",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "SecureTransferCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "challengeExpiry",
+              type: "uint256",
+            },
+          ],
+          name: "SecureTransferRequested",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "signer",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          name: "SignedTransferApplied",
           type: "event",
         },
         {
@@ -2806,7 +3428,7 @@ const deployedContracts = {
               indexed: false,
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
             {
               indexed: false,
@@ -2831,6 +3453,45 @@ const deployedContracts = {
           type: "event",
         },
         {
+          inputs: [],
+          name: "CHALLENGE_EXPIRY",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "EVVM_DOMAIN",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "SIGNATURE_VERSION",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "bytes32",
@@ -2843,31 +3504,14 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -2942,31 +3586,80 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
               components: [
                 {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
                   internalType: "uint8",
-                  name: "securityZone",
+                  name: "v",
                   type: "uint8",
                 },
                 {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
                 },
                 {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
                 },
               ],
-              internalType: "struct InEuint64",
-              name: "amount",
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
               type: "tuple",
+            },
+          ],
+          name: "applySignedTransfer",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -3000,31 +3693,14 @@ const deployedContracts = {
                   type: "bytes32",
                 },
                 {
-                  components: [
-                    {
-                      internalType: "uint256",
-                      name: "ctHash",
-                      type: "uint256",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "securityZone",
-                      type: "uint8",
-                    },
-                    {
-                      internalType: "uint8",
-                      name: "utype",
-                      type: "uint8",
-                    },
-                    {
-                      internalType: "bytes",
-                      name: "signature",
-                      type: "bytes",
-                    },
-                  ],
-                  internalType: "struct InEuint64",
+                  internalType: "externalEuint64",
                   name: "amount",
-                  type: "tuple",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes",
+                  name: "inputProof",
+                  type: "bytes",
                 },
                 {
                   internalType: "uint64",
@@ -3062,6 +3738,61 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          name: "cancelSecureTransfer",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "secret",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "secretProof",
+              type: "bytes",
+            },
+          ],
+          name: "completeSecureTransfer",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "confidentialProtocolId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
               name: "newCommitment",
               type: "bytes32",
             },
@@ -3074,6 +3805,32 @@ const deployedContracts = {
               type: "uint64",
             },
           ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "disableAccountSecret",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "enableAccountSecret",
+          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
@@ -3098,36 +3855,38 @@ const deployedContracts = {
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "faucetAddBalance",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          name: "fheSecretEnabled",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -3169,7 +3928,7 @@ const deployedContracts = {
                 {
                   internalType: "euint64",
                   name: "balance",
-                  type: "uint256",
+                  type: "bytes32",
                 },
                 {
                   internalType: "uint64",
@@ -3249,7 +4008,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "",
-              type: "uint256",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -3269,6 +4028,111 @@ const deployedContracts = {
               internalType: "uint64",
               name: "",
               type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          name: "getSecureTransferChallenge",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "bytes32",
+                  name: "fromVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "toVaddr",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "externalEuint64",
+                  name: "amount",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes",
+                  name: "inputProof",
+                  type: "bytes",
+                },
+                {
+                  internalType: "uint64",
+                  name: "expectedNonce",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint256",
+                  name: "deadline",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "challengeExpiry",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "challengeHash",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bool",
+                  name: "exists",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct EVVMCore.SecureTransferChallenge",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "amountCommitment",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint64",
+              name: "nonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+          ],
+          name: "getTransferMessageHash",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
             },
           ],
           stateMutability: "view",
@@ -3318,7 +4182,7 @@ const deployedContracts = {
                 {
                   internalType: "euint64",
                   name: "amountEnc",
-                  type: "uint256",
+                  type: "bytes32",
                 },
                 {
                   internalType: "uint64",
@@ -3344,6 +4208,25 @@ const deployedContracts = {
               internalType: "struct EVVMCore.VirtualTransaction",
               name: "",
               type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+          ],
+          name: "hasSecretEnabled",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
             },
           ],
           stateMutability: "view",
@@ -3379,35 +4262,77 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          name: "pendingSecureTransfers",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "challengeExpiry",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes32",
+              name: "challengeHash",
+              type: "bytes32",
+            },
+            {
+              internalType: "bool",
+              name: "exists",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
               name: "vaddr",
               type: "bytes32",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerAccount",
@@ -3423,31 +4348,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "initialBalance",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
           ],
           name: "registerAccountFromAddress",
@@ -3475,31 +4383,14 @@ const deployedContracts = {
               type: "address",
             },
             {
-              components: [
-                {
-                  internalType: "uint256",
-                  name: "ctHash",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint8",
-                  name: "securityZone",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
-                  name: "utype",
-                  type: "uint8",
-                },
-                {
-                  internalType: "bytes",
-                  name: "signature",
-                  type: "bytes",
-                },
-              ],
-              internalType: "struct InEuint64",
+              internalType: "externalEuint64",
               name: "amount",
-              type: "tuple",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
             },
             {
               internalType: "uint64",
@@ -3515,6 +4406,161 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint8",
+                  name: "v",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
+                },
+              ],
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
+              type: "tuple",
+            },
+          ],
+          name: "requestPaySigned",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "txId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "fromVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes32",
+              name: "toVaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "amount",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+            {
+              internalType: "uint64",
+              name: "expectedNonce",
+              type: "uint64",
+            },
+            {
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint8",
+                  name: "v",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
+                },
+              ],
+              internalType: "struct EVVMCore.Signature",
+              name: "sig",
+              type: "tuple",
+            },
+          ],
+          name: "requestSecureTransfer",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "challengeId",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "vaddr",
+              type: "bytes32",
+            },
+            {
+              internalType: "externalEuint64",
+              name: "secret",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "inputProof",
+              type: "bytes",
+            },
+          ],
+          name: "setAccountSecret",
+          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
@@ -3690,7 +4736,7 @@ const deployedContracts = {
             {
               internalType: "euint64",
               name: "amountEnc",
-              type: "uint256",
+              type: "bytes32",
             },
             {
               internalType: "uint64",

@@ -4,7 +4,8 @@
 	"private": true,
 	"workspaces": {
 		"packages": [
-			"packages/*"
+			"packages/hardhat",
+			"packages/nextjs"
 		]
 	},
 	"scripts": {
@@ -57,5 +58,11 @@
 	"packageManager": "yarn@3.2.3",
 	"engines": {
 		"node": ">=20.18.3"
+	},
+	"dependencies": {
+		"@nomicfoundation/hardhat-ethers": "^3.0.8",
+		"@zama-fhe/relayer-sdk": "^0.3.0-5",
+		"ethers": "^6.15.0",
+		"hardhat": "^2.22.10"
 	}
 }

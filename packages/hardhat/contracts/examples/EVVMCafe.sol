@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@fhenixprotocol/cofhe-contracts/FHE.sol";
+import {FHE, euint64, externalEuint64} from "@fhevm/solidity/lib/FHE.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../core/EVVM.core.sol";
 
@@ -9,6 +9,7 @@ import "../core/EVVM.core.sol";
 /// @notice Example contract demonstrating integration with EVVM Core using encrypted payments
 /// @dev This contract uses address-based compatibility functions from EVVMCore
 /// @dev All payment amounts are encrypted using FHE (Fully Homomorphic Encryption)
+/// @notice Migrated from Fhenix CoFHE to Zama FHEVM
 contract EVVMCafe is Ownable {
     // ============ State Variables ============
     
@@ -133,11 +134,13 @@ contract EVVMCafe is Ownable {
     
     /// @notice Withdraws encrypted funds from the shop to the owner
     /// @param to Address to receive the funds (must be registered in EVVM)
-    /// @param amountEnc Encrypted amount to withdraw
+    /// @param amountEnc External encrypted handle for the amount to withdraw
+    /// @param inputProof ZK proof validating the encrypted input
     /// @dev Only the shop owner can call this function
     function withdrawFunds(
         address to,
-        InEuint64 calldata amountEnc
+        externalEuint64 amountEnc,
+        bytes calldata inputProof
     ) external onlyOwner {
         require(to != address(0), "EVVMCafe: invalid recipient address");
         
@@ -151,11 +154,11 @@ contract EVVMCafe is Ownable {
         // Get current nonce for the shop
         uint64 nonce = evvmCore.getNonce(shopVaddr);
         
-        // Transfer encrypted funds
-        evvmCore.applyTransfer(shopVaddr, toVaddr, amountEnc, nonce);
+        // Transfer encrypted funds (now requires inputProof)
+        evvmCore.applyTransfer(shopVaddr, toVaddr, amountEnc, inputProof, nonce);
         
-        // Get encrypted amount for event (convert InEuint64 to euint64)
-        euint64 amountEncEuint = FHE.asEuint64(amountEnc);
+        // Convert external encrypted input to internal type for the event
+        euint64 amountEncEuint = FHE.fromExternal(amountEnc, inputProof);
         
         emit FundsWithdrawn(to, amountEncEuint);
     }
@@ -199,11 +202,8 @@ contract EVVMCafe is Ownable {
     // ============ Setup Functions ============
     
     /// @notice Registers the shop in EVVM Core (must be called before first order)
-    /// @param initialBalance Encrypted initial balance for the shop (usually zero)
-    /// @dev This function should be called during setup to register the shop's address in EVVM
-    /// @dev The shop address will be automatically mapped to a vaddr
-    /// @notice Registers the shop in EVVM Core (must be called before first order)
-    /// @param initialBalance Encrypted initial balance for the shop (usually zero)
+    /// @param initialBalance External encrypted handle for the initial balance (usually zero)
+    /// @param inputProof ZK proof validating the encrypted input
     /// @dev This function should be called during setup to register the shop's address in EVVM
     /// @dev The shop address will be automatically mapped to a vaddr
     /// @dev Logic:
@@ -212,7 +212,7 @@ contract EVVMCafe is Ownable {
     ///   3. If not mapped, generate the vaddr deterministically and check if account exists
     ///   4. If account exists via generated vaddr, revert with ShopAlreadyRegistered
     ///   5. Otherwise, call registerAccountFromAddress to register the shop
-    function registerShopInEVVM(InEuint64 calldata initialBalance) external {
+    function registerShopInEVVM(externalEuint64 initialBalance, bytes calldata inputProof) external {
         // Step 1: Check if address is already mapped to a vaddr
         bytes32 shopVaddr = evvmCore.getVaddrFromAddress(address(this));
         if (shopVaddr != bytes32(0)) {
@@ -233,7 +233,7 @@ contract EVVMCafe is Ownable {
             revert ShopAlreadyRegistered();
         }
         
-        // Step 5: Register shop using address-based function
+        // Step 5: Register shop using address-based function (now requires inputProof)
         // This will:
         //   - Generate the same vaddr we just checked
         //   - Create the mapping addressToVaddr[address(this)] = vaddr
@@ -242,7 +242,7 @@ contract EVVMCafe is Ownable {
         // If the shop is already registered, this will revert with:
         //   - "EVVM: account already exists" (if vaddr exists)
         //   - "EVVM: address already registered" (if address is mapped)
-        evvmCore.registerAccountFromAddress(address(this), initialBalance);
+        evvmCore.registerAccountFromAddress(address(this), initialBalance, inputProof);
     }
     
     /// @notice Checks if the shop is registered in EVVM

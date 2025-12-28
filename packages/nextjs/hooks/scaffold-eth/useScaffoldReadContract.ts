@@ -1,16 +1,10 @@
-import { QueryObserverResult, RefetchOptions, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ExtractAbiFunctionNames } from "abitype";
-import { ReadContractErrorType } from "viem";
 import { useReadContract, useWatchBlockNumber } from "wagmi";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { AllowedChainIds } from "~~/utils/scaffold-eth";
-import {
-  AbiFunctionReturnType,
-  ContractAbi,
-  ContractName,
-  UseScaffoldReadConfig,
-} from "~~/utils/scaffold-eth/contract";
+import { ContractAbi, ContractName, UseScaffoldReadConfig } from "~~/utils/scaffold-eth/contract";
 
 /**
  * Wrapper around wagmi's useContractRead hook which automatically loads (by name) the contract ABI and address from
@@ -40,12 +34,7 @@ export const useScaffoldReadContract = <
   const { query: queryOptions, watch, ...readContractConfig } = readConfig;
   // set watch to true by default
   const defaultWatch = watch ?? true;
-  const readContractHookRes: Omit<ReturnType<typeof useReadContract>, "data" | "refetch"> & {
-    data: AbiFunctionReturnType<ContractAbi, TFunctionName> | undefined;
-    refetch: (
-      options?: RefetchOptions | undefined,
-    ) => Promise<QueryObserverResult<AbiFunctionReturnType<ContractAbi, TFunctionName>, ReadContractErrorType>>;
-  } = useReadContract({
+  const readContractHookRes = useReadContract({
     chainId: selectedNetwork.id,
     functionName,
     address: deployedContract?.address,

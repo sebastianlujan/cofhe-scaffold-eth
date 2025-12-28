@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
-import { FheTypes } from "@cofhe/sdk";
+"use client";
+
+import React from "react";
 import { LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import { useCofheConnected, useCofheIsActivePermitValid, useCofheModalStore } from "~~/app/useCofhe";
-import { useDecryptValue } from "~~/app/useDecrypt";
+import { useDecryptValue } from "~~/app/hooks/useDecrypt";
+import { useZamaFhevm } from "~~/app/hooks/useZamaFhevm";
 
 interface EncryptedZoneProps {
   className?: string;
@@ -45,65 +46,63 @@ export const EncryptedZone = ({ className = "", children }: EncryptedZoneProps) 
   );
 };
 
-interface EncryptedValueProps<T extends FheTypes> {
-  fheType: T;
+interface EncryptedValueProps {
   ctHash: bigint | null | undefined;
   label: string;
 }
 
-export const EncryptedValue = <T extends FheTypes>({ label, fheType, ctHash }: EncryptedValueProps<T>) => {
-  const cofheConnected = useCofheConnected();
-  const isPermitValid = useCofheIsActivePermitValid();
-  const setGeneratePermitModalOpen = useCofheModalStore(state => state.setGeneratePermitModalOpen);
-  const { onDecrypt, result } = useDecryptValue(fheType, ctHash);
-
-  const handleDecrypt = useCallback(() => {
-    // If permit is invalid or missing, open the generate permit modal
-    // After the user generates a new permit, the callback will be called to decrypt the value
-    if (!isPermitValid) {
-      setGeneratePermitModalOpen(true, onDecrypt);
-      return;
-    }
-
-    // Permit is valid, decrypt the value
-    onDecrypt();
-  }, [isPermitValid, onDecrypt, setGeneratePermitModalOpen]);
+/**
+ * EncryptedValue Component
+ *
+ * A reusable component for displaying and decrypting encrypted FHE values.
+ * Uses the Zama FHEVM Relayer SDK for decryption.
+ *
+ * NOTE: This component uses PUBLIC decryption which works for values
+ * that were made publicly decryptable via FHE.makePubliclyDecryptable().
+ * For true privacy, contracts would need to use FHE.allow() instead.
+ */
+export const EncryptedValue = ({ label, ctHash }: EncryptedValueProps) => {
+  const { isInitialized } = useZamaFhevm();
+  const { value, state, error, onDecrypt } = useDecryptValue(ctHash);
 
   return (
     <div className="flex flex-row items-center justify-start p-1 pl-4 gap-2 flex-1 rounded-3xl bg-primary-content/5 min-h-12">
       <span className="text-xs font-semibold">{label}</span>
-      {result.state === "no-data" && <span className="text-xs font-semibold flex-1 italic">No data</span>}
-      {result.state === "encrypted" && (
-        <span className={`btn btn-md btn-cofhe flex-1 ${cofheConnected ? "" : "btn-disabled"}`} onClick={handleDecrypt}>
+
+      {state === "no-data" && <span className="text-xs font-semibold flex-1 italic">No data</span>}
+
+      {(state === "encrypted" || state === "idle") && ctHash && ctHash !== 0n && (
+        <span className={`btn btn-md btn-cofhe flex-1 ${isInitialized ? "" : "btn-disabled"}`} onClick={onDecrypt}>
           <LockClosedIcon className="w-5 h-5" aria-hidden="true" />
           <span className="flex flex-1 items-center justify-center">
             <span>Encrypted</span>
           </span>
         </span>
       )}
-      {result.state === "pending" && (
+
+      {state === "pending" && (
         <span className="btn btn-md btn-cofhe btn-disabled flex-1">
           <div className="loading-spinner loading-sm" />
           Decrypting
         </span>
       )}
-      {result.state === "success" && (
+
+      {state === "success" && (
         <div className="flex flex-1 px-4 items-center justify-center gap-2 h-10 bg-success/10 border-success border-2 border-solid rounded-full">
           <LockOpenIcon className="w-5 h-5 text-success" aria-hidden="true" />
           <div className="flex flex-1 items-center justify-center">
-            <span className="font-mono">{result.value}</span>
+            <span className="font-mono">{value?.toString() ?? "0"}</span>
           </div>
         </div>
       )}
-      {result.state === "error" && (
-        <span className="text-xs text-warning font-semibold flex-1 italic">{result.error}</span>
-      )}
+
+      {state === "error" && <span className="text-xs text-warning font-semibold flex-1 italic">{error}</span>}
     </div>
   );
 };
 
 // For backward compatibility
-export const EncryptedValueCard = <T extends FheTypes>(props: EncryptedValueProps<T>) => {
+export const EncryptedValueCard = (props: EncryptedValueProps) => {
   return (
     <EncryptedZone>
       <EncryptedValue {...props} />

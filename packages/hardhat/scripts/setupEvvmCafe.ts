@@ -1,5 +1,3 @@
-import { Contract } from "ethers";
-
 /**
  * Setup script for EVVMCafe
  *
@@ -12,14 +10,13 @@ import { Contract } from "ethers";
  */
 async function main() {
   const hre = await import("hardhat");
-  const [deployer] = await hre.ethers.getSigners();
 
   // Get deployed contracts using deployments
   const evvmCafeDeployment = await hre.deployments.get("EVVMCafe");
   const evvmCoreDeployment = await hre.deployments.get("EVVMCore");
 
-  const evvmCafe = await hre.ethers.getContractAt<Contract>("EVVMCafe", evvmCafeDeployment.address, deployer);
-  const evvmCore = await hre.ethers.getContractAt<Contract>("EVVMCore", evvmCoreDeployment.address, deployer);
+  const evvmCafe = await hre.ethers.getContractAt("EVVMCafe", evvmCafeDeployment.address);
+  const evvmCore = await hre.ethers.getContractAt("EVVMCore", evvmCoreDeployment.address);
 
   console.log("Setting up EVVMCafe...");
   console.log("EVVMCafe address:", await evvmCafe.getAddress());
