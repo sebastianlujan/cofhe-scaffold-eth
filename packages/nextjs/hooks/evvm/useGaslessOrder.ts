@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Address, Hex } from "viem";
+import { Hex } from "viem";
 import { useAccount, useChainId, useSignMessage } from "wagmi";
 import { useEncrypt } from "~~/app/hooks/useEncrypt";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
@@ -14,6 +14,64 @@ import {
   getTimeUntilDeadline,
   isDeadlineValid,
 } from "~~/utils/evvm/eip191Builder";
+
+// ============ Error Message Mapping ============
+
+/**
+ * Maps technical/contract error messages to user-friendly messages
+ */
+function parseErrorToUserMessage(rawError: string): string {
+  const errorLower = rawError.toLowerCase();
+
+  // Known error signatures
+  if (rawError.includes("0xe58f9c95")) {
+    return "Unable to process your order. Please refresh the page and try again.";
+  }
+
+  // Signature/auth errors
+  if (errorLower.includes("signatureexpired") || errorLower.includes("signature expired")) {
+    return "Your order session has expired. Please try again.";
+  }
+  if (errorLower.includes("invalidsignature") || errorLower.includes("invalid signature")) {
+    return "Order verification failed. Please try again.";
+  }
+
+  // Nonce errors
+  if (errorLower.includes("nonce") && (errorLower.includes("used") || errorLower.includes("already"))) {
+    return "This order was already processed. Please refresh and try again.";
+  }
+
+  // Registration errors
+  if (errorLower.includes("usernotregistered") || errorLower.includes("user not registered")) {
+    return "Please register your account before ordering.";
+  }
+  if (errorLower.includes("shopnotregistered") || errorLower.includes("shop not registered")) {
+    return "The coffee shop is currently unavailable. Please try again later.";
+  }
+
+  // Balance errors
+  if (errorLower.includes("insufficientbalance") || errorLower.includes("insufficient balance")) {
+    return "Insufficient balance. Please add more funds to your account.";
+  }
+
+  // Generic contract errors
+  if (errorLower.includes("reverted") || errorLower.includes("contract function")) {
+    return "Unable to process your order. Please try again later.";
+  }
+
+  // Network errors
+  if (errorLower.includes("timeout") || errorLower.includes("network") || errorLower.includes("fetch")) {
+    return "Connection issue. Please check your internet and try again.";
+  }
+
+  // Service unavailable
+  if (errorLower.includes("503") || errorLower.includes("unavailable")) {
+    return "Order service is temporarily unavailable. Please try again later.";
+  }
+
+  // Default fallback - don't show technical details
+  return "Something went wrong. Please try again.";
+}
 
 // ============ Types ============
 
@@ -79,7 +137,12 @@ export interface UseGaslessOrderReturn {
  * ```
  */
 export function useGaslessOrder(options: UseGaslessOrderOptions = {}): UseGaslessOrderReturn {
-  const { priorityFee = DEFAULT_PRIORITY_FEE, deadlineSeconds = DEFAULT_DEADLINE_OFFSET_SECONDS, onSuccess, onError } = options;
+  const {
+    priorityFee = DEFAULT_PRIORITY_FEE,
+    deadlineSeconds = DEFAULT_DEADLINE_OFFSET_SECONDS,
+    onSuccess,
+    onError,
+  } = options;
 
   // Wagmi hooks
   const { address } = useAccount();
@@ -102,7 +165,8 @@ export function useGaslessOrder(options: UseGaslessOrderOptions = {}): UseGasles
     args: [address],
   });
   const clientVaddr = clientVaddrData as Hex | undefined;
-  const isClientRegistered = clientVaddr && clientVaddr !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+  const isClientRegistered =
+    clientVaddr && clientVaddr !== "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   // Get EVVM nonce for the client
   const { data: evvmNonceData } = useScaffoldReadContract({
@@ -218,8 +282,18 @@ export function useGaslessOrder(options: UseGaslessOrderOptions = {}): UseGasles
         setLastResult(result);
         return result;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to prepare order";
+        let message = err instanceof Error ? err.message : "Failed to prepare order";
         console.error("[GaslessOrder] Error:", err);
+
+        // Convert technical errors to user-friendly messages
+        if (message.includes("User rejected") || message.includes("user rejected")) {
+          message = "Order cancelled.";
+        } else if (message.includes("encrypt")) {
+          message = "Unable to secure your payment. Please try again.";
+        } else if (message.includes("sign")) {
+          message = "Signature required to complete your order.";
+        }
+
         setError(message);
         setState("error");
         onError?.(err instanceof Error ? err : new Error(message));
@@ -282,9 +356,12 @@ export function useGaslessOrder(options: UseGaslessOrderOptions = {}): UseGasles
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const errorMessage = errorData.message || errorData.error || `Fisher API error: ${response.status}`;
+          const rawError = errorData.message || errorData.error || `Fisher API error: ${response.status}`;
           console.error("[GaslessOrder] Fisher error response:", errorData);
-          throw new Error(errorMessage);
+
+          // Parse the raw error and convert to user-friendly message
+          const userFriendlyMessage = parseErrorToUserMessage(rawError);
+          throw new Error(userFriendlyMessage);
         }
 
         const data = await response.json();
@@ -294,11 +371,15 @@ export function useGaslessOrder(options: UseGaslessOrderOptions = {}): UseGasles
         onSuccess?.(result);
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to submit to Fisher";
+        const rawMessage = err instanceof Error ? err.message : "Failed to submit order";
         console.error("[GaslessOrder] Fisher error:", err);
-        setError(message);
+
+        // Parse to user-friendly message (error might already be parsed, but this ensures consistency)
+        const userMessage = parseErrorToUserMessage(rawMessage);
+
+        setError(userMessage);
         setState("error");
-        onError?.(err instanceof Error ? err : new Error(message));
+        onError?.(new Error(userMessage));
         return false;
       }
     },

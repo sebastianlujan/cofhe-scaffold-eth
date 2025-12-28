@@ -14,9 +14,8 @@
  * - FISHER_PRIVATE_KEY: Private key of the Fisher wallet
  * - SEPOLIA_RPC_URL: RPC endpoint for Sepolia (optional, uses Alchemy default)
  */
-
 import { NextRequest, NextResponse } from "next/server";
-import { createPublicClient, createWalletClient, http, Hex, Address } from "viem";
+import { Address, Hex, createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 
@@ -216,30 +215,35 @@ export async function POST(req: NextRequest) {
       console.error("[Fisher] Simulation failed:", simError);
       const message = simError instanceof Error ? simError.message : "Transaction simulation failed";
 
-      // Try to extract revert reason
-      if (message.includes("SignatureExpired")) {
-        throw new Error("Signature has expired");
+      // Map contract errors to user-friendly messages
+      // Known error signatures and messages
+      if (message.includes("SignatureExpired") || message.includes("0xe58f9c95")) {
+        throw new Error("Your order session has expired. Please try again.");
       }
       if (message.includes("InvalidSignature")) {
-        throw new Error("Invalid signature");
+        throw new Error("Order verification failed. Please try again.");
       }
       if (message.includes("ServiceNonceUsed") || message.includes("ServiceNonceAlreadyUsed")) {
-        throw new Error("Service nonce already used");
+        throw new Error("This order has already been processed. Please refresh and try again.");
       }
       if (message.includes("UserNotRegistered")) {
-        throw new Error("User not registered in EVVM");
+        throw new Error("Please register your account before ordering.");
       }
       if (message.includes("ShopNotRegistered")) {
-        throw new Error("Shop not registered in EVVM");
+        throw new Error("The coffee shop is not available at the moment. Please try again later.");
       }
       if (message.includes("InsufficientBalance")) {
-        throw new Error("Insufficient balance for payment");
+        throw new Error("Insufficient balance. Please add more funds to your account.");
       }
       if (message.includes("AmountCommitmentMismatch")) {
-        throw new Error("Amount commitment mismatch");
+        throw new Error("Payment verification failed. Please try again.");
+      }
+      // Generic contract revert - likely a business logic error
+      if (message.includes("reverted") || message.includes("0x")) {
+        throw new Error("Unable to process your order at this time. Please try again later.");
       }
 
-      throw new Error(`Transaction would fail: ${message}`);
+      throw new Error("Something went wrong. Please try again.");
     }
 
     console.log("[Fisher] Simulation passed, executing transaction...");
@@ -292,15 +296,24 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[Fisher] Error:", error);
 
-    const message = error instanceof Error ? error.message : "Unknown error";
+    let message = error instanceof Error ? error.message : "Unknown error";
+
+    // Convert any remaining technical errors to user-friendly messages
+    if (message.includes("FISHER_PRIVATE_KEY")) {
+      message = "Order service is temporarily unavailable. Please try again later.";
+    } else if (message.includes("gas") || message.includes("nonce")) {
+      message = "Network is busy. Please try again in a moment.";
+    } else if (message.includes("timeout") || message.includes("network")) {
+      message = "Connection issue. Please check your internet and try again.";
+    }
 
     // Determine appropriate status code
     let status = 500;
-    if (message.includes("expired") || message.includes("Invalid")) {
+    if (message.includes("expired") || message.includes("session") || message.includes("verification")) {
       status = 400;
     }
-    if (message.includes("FISHER_PRIVATE_KEY")) {
-      status = 503; // Service unavailable
+    if (message.includes("unavailable") || message.includes("temporarily")) {
+      status = 503;
     }
 
     return NextResponse.json({ success: false, error: message }, { status });

@@ -34,8 +34,7 @@ export class ConfigService {
   }
 
   get port(): number {
-    const port = this.configService.get<string>('PORT');
-    return parseInt(port, 10);
+    return this.configService.get<number>('PORT', 3001);
   }
 
   get minPriorityFee(): bigint {

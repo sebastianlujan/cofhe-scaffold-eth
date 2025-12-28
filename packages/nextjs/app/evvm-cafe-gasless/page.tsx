@@ -8,9 +8,11 @@ import { useZamaFhevm } from "~~/app/hooks/useZamaFhevm";
 import { Address } from "~~/components/scaffold-eth";
 import { useGaslessOrder } from "~~/hooks/evvm/useGaslessOrder";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { getServiceNonce, incrementServiceNonce } from "~~/utils/evvm/secureCache";
 import { notification } from "~~/utils/scaffold-eth";
 
 const COFFEE_TYPES = ["espresso", "latte", "cappuccino", "americano"] as const;
+const CHAIN_ID = 11155111; // Sepolia
 
 // Icons
 const CoffeeIcon = () => (
@@ -67,7 +69,10 @@ export default function EVVMCafeGaslessPage() {
   const [initialBalance, setInitialBalance] = useState<string>("1000");
   const [coffeeType, setCoffeeType] = useState<string>("espresso");
   const [quantity, setQuantity] = useState<string>("1");
-  const [serviceNonce, setServiceNonce] = useState<number>(1);
+  const [serviceNonce, setServiceNonce] = useState<number>(() => {
+    // Will be initialized properly in useEffect when contract address is available
+    return Math.floor(Date.now() / 1000);
+  });
   const [fisherStatus, setFisherStatus] = useState<"unknown" | "ready" | "not-configured">("unknown");
 
   const { encryptUint64, isEncrypting, encryptionDisabled } = useEncrypt();
@@ -85,7 +90,13 @@ export default function EVVMCafeGaslessPage() {
   } = useGaslessOrder({
     onSuccess: () => {
       notification.success("Gasless order submitted successfully!");
-      setServiceNonce(prev => prev + 1);
+      // Increment and persist nonce in secure cache
+      if (address && evvmCafeGaslessContract?.address) {
+        const nextNonce = incrementServiceNonce(CHAIN_ID, evvmCafeGaslessContract.address, address);
+        setServiceNonce(nextNonce);
+      } else {
+        setServiceNonce(prev => prev + 1);
+      }
       refetchClientBalance();
       refetchShopBalance();
     },
@@ -166,6 +177,15 @@ export default function EVVMCafeGaslessPage() {
     state: shopBalanceState,
     error: shopBalanceError,
   } = useDecryptValue(shopBalanceBigInt);
+
+  // Load cached service nonce when contract and wallet are available
+  useEffect(() => {
+    if (address && evvmCafeGaslessContract?.address) {
+      const cachedNonce = getServiceNonce(CHAIN_ID, evvmCafeGaslessContract.address, address);
+      setServiceNonce(cachedNonce);
+      console.log("[GaslessCafe] Loaded cached nonce:", cachedNonce);
+    }
+  }, [address, evvmCafeGaslessContract?.address]);
 
   // Check Fisher status on mount
   useEffect(() => {
