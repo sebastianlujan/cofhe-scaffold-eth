@@ -4,7 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useZamaFhevm } from "./useZamaFhevm";
 import { useAccount, useWalletClient } from "wagmi";
 
-export type DecryptionState = "idle" | "pending" | "success" | "error" | "no-data" | "encrypted";
+// ============ Configuration ============
+
+const MAX_SDK_RETRIES = 0; // Skip SDK retries - go straight to proxy on first failure (CORS issues in dev)
+const INITIAL_DELAY_MS = 1500;
+const MAX_DELAY_MS = 6000;
+
+// ============ Types ============
+
+export type DecryptionState = "idle" | "pending" | "success" | "error" | "no-data" | "encrypted" | "retrying";
 
 export interface DecryptResult {
   value: bigint | null;
@@ -18,8 +26,147 @@ export interface UsePublicDecryptResult {
   error: string | null;
 }
 
+// ============ Helpers ============
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isRetryableError(error: unknown): boolean {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    // Retry on timeout, network errors, relayer issues
+    return (
+      message.includes("timeout") ||
+      message.includes("network") ||
+      message.includes("failed to fetch") ||
+      message.includes("504") ||
+      message.includes("503") ||
+      message.includes("502") ||
+      message.includes("relayer didn't respond") ||
+      message.includes("cors") ||
+      message.includes("err_failed")
+    );
+  }
+  return false;
+}
+
+// ============ Proxy Decryption ============
+
+interface ProxyDecryptResponse {
+  success: boolean;
+  clearValues?: Record<string, string>;
+  error?: string;
+}
+
+async function decryptViaProxy(handleHex: string): Promise<bigint | null> {
+  console.log("[Decrypt] Attempting proxy decryption for:", handleHex.slice(0, 20) + "...");
+
+  const response = await fetch("/api/decrypt", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ handles: [handleHex] }),
+  });
+
+  const data = (await response.json()) as ProxyDecryptResponse;
+
+  if (!data.success) {
+    throw new Error(data.error || "Proxy decryption failed");
+  }
+
+  if (!data.clearValues || Object.keys(data.clearValues).length === 0) {
+    throw new Error("No decrypted values returned from proxy");
+  }
+
+  // Find the value - try multiple matching strategies
+  let value: string | undefined;
+  
+  // Strategy 1: Exact match
+  value = data.clearValues[handleHex];
+  
+  // Strategy 2: Case-insensitive match
+  if (value === undefined) {
+    value = data.clearValues[handleHex.toLowerCase()];
+  }
+  
+  // Strategy 3: Find any key that ends with the same suffix (handles might have different padding)
+  if (value === undefined) {
+    const handleSuffix = handleHex.toLowerCase().replace(/^0x0*/, ''); // Remove 0x and leading zeros
+    const key = Object.keys(data.clearValues).find(k => {
+      const keySuffix = k.toLowerCase().replace(/^0x0*/, '');
+      return keySuffix === handleSuffix || handleSuffix.endsWith(keySuffix) || keySuffix.endsWith(handleSuffix);
+    });
+    if (key) {
+      value = data.clearValues[key];
+    }
+  }
+  
+  // Strategy 4: If only one value returned, use it (single handle request)
+  if (value === undefined && Object.keys(data.clearValues).length === 1) {
+    value = Object.values(data.clearValues)[0];
+    console.log("[Decrypt] Using single returned value");
+  }
+
+  if (value === undefined) {
+    console.error("[Decrypt] Handle not found in proxy response.");
+    console.error("[Decrypt] Requested handle:", handleHex);
+    console.error("[Decrypt] Available keys:", Object.keys(data.clearValues));
+    throw new Error("Handle not found in proxy decryption results");
+  }
+
+  console.log("[Decrypt] Proxy decryption successful:", value);
+  return BigInt(value);
+}
+
+// ============ SDK Decryption with Retry ============
+
+async function decryptWithSDKRetry(
+  instance: { publicDecrypt: (handles: `0x${string}`[]) => Promise<{ clearValues: Record<string, unknown> }> },
+  handleHex: `0x${string}`,
+  attempt = 0,
+): Promise<bigint | null> {
+  try {
+    console.log(`[Decrypt] SDK attempt ${attempt + 1}/${MAX_SDK_RETRIES + 1} for:`, handleHex.slice(0, 20) + "...");
+
+    const results = await instance.publicDecrypt([handleHex]);
+    const decryptedValue = results.clearValues[handleHex];
+
+    if (decryptedValue === undefined) {
+      throw new Error("Handle not found in decryption results");
+    }
+
+    // Handle different return types
+    if (typeof decryptedValue === "bigint") {
+      return decryptedValue;
+    } else if (typeof decryptedValue === "boolean") {
+      return decryptedValue ? 1n : 0n;
+    } else if (typeof decryptedValue === "string") {
+      return BigInt(decryptedValue);
+    }
+
+    return BigInt(decryptedValue as string);
+  } catch (err) {
+    console.log(`[Decrypt] SDK attempt ${attempt + 1} failed:`, err instanceof Error ? err.message : err);
+
+    if (attempt < MAX_SDK_RETRIES && isRetryableError(err)) {
+      const delay = Math.min(INITIAL_DELAY_MS * Math.pow(2, attempt), MAX_DELAY_MS);
+      console.log(`[Decrypt] Retrying SDK in ${delay}ms...`);
+      await sleep(delay);
+      return decryptWithSDKRetry(instance, handleHex, attempt + 1);
+    }
+
+    throw err;
+  }
+}
+
 /**
  * Hook for PUBLIC decryption (Demo Mode)
+ *
+ * Features:
+ * - Retry logic with exponential backoff for SDK calls
+ * - Fallback to server-side proxy if SDK fails (bypasses CORS)
  *
  * Use this when contracts call FHE.makePubliclyDecryptable()
  * Anyone can decrypt these values - NO PRIVACY
@@ -48,37 +195,33 @@ export function usePublicDecrypt(): UsePublicDecryptResult {
       setIsDecrypting(true);
       setError(null);
 
+      // Convert bigint to hex string for API
+      // Pad to 64 characters (32 bytes) as Zama expects full-length handles
+      const hexWithoutPrefix = handleBigInt.toString(16).padStart(64, '0');
+      const handleHex = `0x${hexWithoutPrefix}` as `0x${string}`;
+      console.log("[Decrypt] Starting public decryption for handle:", handleHex);
+
       try {
-        // Convert bigint to hex string for API
-        const handleHex = `0x${handleBigInt.toString(16)}` as `0x${string}`;
-        console.log("[Decrypt] Starting public decryption for handle:", handleHex);
+        // Strategy 1: Try SDK with retries first
+        const result = await decryptWithSDKRetry(instance, handleHex);
+        console.log("[Decrypt] SDK decryption successful:", result);
+        return result;
+      } catch (sdkError) {
+        console.warn("[Decrypt] SDK decryption failed after retries:", sdkError instanceof Error ? sdkError.message : sdkError);
 
-        // Public decryption - expects array of handles, returns { clearValues, abiEncodedClearValues, decryptionProof }
-        const results = await instance.publicDecrypt([handleHex]);
-
-        // Get the decrypted value from clearValues map
-        const decryptedValue = results.clearValues[handleHex];
-        console.log("[Decrypt] Decrypted value:", decryptedValue);
-
-        if (decryptedValue === undefined) {
-          throw new Error("Handle not found in decryption results");
+        // Strategy 2: Fallback to proxy
+        try {
+          console.log("[Decrypt] Falling back to proxy...");
+          const proxyResult = await decryptViaProxy(handleHex);
+          console.log("[Decrypt] Proxy decryption successful:", proxyResult);
+          return proxyResult;
+        } catch (proxyError) {
+          // Both strategies failed
+          const message = proxyError instanceof Error ? proxyError.message : "Decryption failed";
+          setError(`Decryption failed (SDK & Proxy): ${message}`);
+          console.error("[Decrypt] Both SDK and Proxy failed:", proxyError);
+          return null;
         }
-
-        // Handle different return types (bigint | boolean | `0x${string}`)
-        if (typeof decryptedValue === "bigint") {
-          return decryptedValue;
-        } else if (typeof decryptedValue === "boolean") {
-          return decryptedValue ? 1n : 0n;
-        } else if (typeof decryptedValue === "string") {
-          return BigInt(decryptedValue);
-        }
-
-        return BigInt(decryptedValue as string);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Decryption failed";
-        setError(message);
-        console.error("[Decrypt] Public decryption error:", err);
-        return null;
       } finally {
         setIsDecrypting(false);
       }

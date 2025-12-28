@@ -116,6 +116,10 @@ const config: HardhatUserConfig = {
     outDir: "typechain-types",
     target: "ethers-v6",
   },
+  // Mocha test configuration
+  mocha: {
+    timeout: 120000, // 2 minutes for FHE operations on hardhat
+  },
 };
 
 // Task to list accounts
