@@ -247,21 +247,4 @@ npx hardhat run scripts/registerGaslessShop.ts --network sepolia
 
 ---
 
-## Documentation Files
-
-| File | Description |
-|------|-------------|
-| `docs/EIP191_SIGNATURE_PLAN.md` | EIP-191 signature implementation plan |
-| `docs/EVVM_DEVELOPMENT_ROADMAP.md` | Overall development roadmap |
-| `docs/FHE_SIGNATURES_ANALYSIS.md` | FHE signature analysis |
-| `docs/FHENIX_TO_ZAMA_MIGRATION_PLAN.md` | Migration from Fhenix to Zama |
-| `docs/FHEVM_UPGRADE_ANALYSIS.md` | FHEVM upgrade analysis |
-| `EVVMCafe_FRONTEND_USAGE.md` | Frontend usage guide |
-| `EVVMCafe_INTEGRATION.md` | Integration guide |
-| `STATE_COMMITMENT_GUIDE.md` | State commitment documentation |
-| `DEVELOPMENT_PLAN.md` | Development plan |
-| `DEPLOYMENT_STATUS.md` | Deployment status |
-
----
-
 *Last Updated: December 28, 2025*

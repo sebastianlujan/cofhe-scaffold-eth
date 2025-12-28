@@ -106,4 +106,41 @@ export class BlockchainService implements OnModuleInit {
       return false;
     }
   }
+
+  /**
+   * Checks if a service nonce has already been used for a client
+   * Used for pre-validation to avoid submitting already-used nonces
+   *
+   * @param client - The client address
+   * @param nonce - The service nonce to check
+   * @returns true if nonce has been used
+   */
+  async isServiceNonceUsed(client: Hex, nonce: bigint): Promise<boolean> {
+    try {
+      const result = await this.publicClient.readContract({
+        address: this.config.evvmCafeGaslessAddress as Hex,
+        abi: EVVMCafeGaslessABI,
+        functionName: 'isServiceNonceUsed',
+        args: [client, nonce],
+      });
+      return result as boolean;
+    } catch (error) {
+      this.logger.warn(`Failed to check service nonce: ${error}`);
+      // If we can't check, assume not used and let contract validate
+      return false;
+    }
+  }
+
+  /**
+   * Gets the service ID from the contract
+   * Used to verify messages are built with correct service ID
+   */
+  async getServiceId(): Promise<bigint> {
+    const result = await this.publicClient.readContract({
+      address: this.config.evvmCafeGaslessAddress as Hex,
+      abi: EVVMCafeGaslessABI,
+      functionName: 'serviceId',
+    });
+    return result as bigint;
+  }
 }

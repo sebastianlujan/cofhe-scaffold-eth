@@ -1,10 +1,8 @@
 # EVVM - Encrypted Virtual Virtual Machine
 
-A privacy-preserving payment system built with Fully Homomorphic Encryption (FHE) using Zama's FHEVM on Ethereum.
-
 ## Overview
 
-EVVM (Encrypted Virtual Virtual Machine) is a virtual blockchain layer that enables private payments with encrypted balances. It provides:
+EVVM (Encrypted Virtual Virtual Machine) is a virtual layer that enables private payments with encrypted balances. It provides:
 
 - **Private Balances**: Account balances are encrypted using FHE - no one can see how much you have
 - **Private Transfers**: Transfer amounts are encrypted - observers only see that a transfer occurred
@@ -217,8 +215,7 @@ evvmCore.applySignedTransfer(
 );
 ```
 
-#### 3. Secure Transfer (Plan 2A - two-phase with FHE secret)
-
+#### 3. Secure Transfer
 ```solidity
 // Phase 1: Set up account secret (one-time)
 evvmCore.setAccountSecret(vaddr, encryptedSecret, secretProof);
