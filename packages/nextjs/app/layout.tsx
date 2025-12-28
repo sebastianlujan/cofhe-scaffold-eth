@@ -6,7 +6,8 @@ import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
   title: "Confidential EVVM",
-  description: "Encrypted Virtual Value Machine - Private payments powered by Fully Homomorphic Encryption on Sepolia",
+  description:
+    "Encrypted Virtual Virtual Machine - Private payments powered by Fully Homomorphic Encryption on Sepolia",
 });
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {

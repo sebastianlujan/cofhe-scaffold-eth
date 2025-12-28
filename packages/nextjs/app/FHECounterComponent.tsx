@@ -44,7 +44,7 @@ export const FHECounterComponent = () => {
         <p className="text-sm text-gray-600 mb-2">This scaffold includes:</p>
         <ul className="text-sm text-left list-disc list-inside space-y-1">
           <li>
-            <strong>EVVMCore</strong> - Encrypted Virtual Value Machine
+            <strong>EVVMCore</strong> - Encrypted Virtual Virtual Machine
           </li>
           <li>
             <strong>EVVMCafe</strong> - Demo coffee shop with FHE payments

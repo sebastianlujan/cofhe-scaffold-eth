@@ -19,7 +19,7 @@ export const Footer = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-[#00EE96] text-sm">EVVM</span>
-              <span className="text-xs text-white/50">Encrypted Virtual Value Machine</span>
+              <span className="text-xs text-white/50">Encrypted Virtual Virtual Machine</span>
             </div>
           </div>
 
@@ -62,7 +62,10 @@ export const Footer = () => {
         {/* Bottom divider */}
         <div className="mt-6 pt-4 border-t border-white/10">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/40">
-            <span>Powered by Zama FHEVM - Fully Homomorphic Encryption</span>
+            <span>
+              Powered by <span className="text-[#00EE96] font-medium">EVVM</span> using{" "}
+              <span className="text-white/60">Fully Homomorphic Encryption</span>
+            </span>
             <span>Testnet Demo</span>
           </div>
         </div>
