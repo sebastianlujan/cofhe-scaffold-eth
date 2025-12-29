@@ -5,7 +5,7 @@ A NestJS-based relayer that executes gasless FHE transactions for EVVM.
 ## How It Works
 
 ```
-┌──────────────┐     1. Sign EIP-712      ┌──────────────┐     2. Execute tx     ┌────────────────┐
+┌──────────────┐     1. Sign EIP-191      ┌──────────────┐     2. Execute tx     ┌────────────────┐
 │     User     │ ───────────────────────▶ │    Fisher    │ ───────────────────▶ │   Contract     │
 │  (Frontend)  │      (no gas!)           │   (NestJS)   │     (pays gas)       │ (EVVMCafeGasless)
 └──────────────┘                          └──────────────┘                      └────────────────┘
