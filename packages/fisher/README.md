@@ -5,7 +5,7 @@ A NestJS-based relayer that executes gasless FHE transactions for EVVM.
 ## How It Works
 
 ```
-┌──────────────┐     1. Sign EIP-712      ┌──────────────┐     2. Execute tx     ┌────────────────┐
+┌──────────────┐     1. Sign EIP-191      ┌──────────────┐     2. Execute tx     ┌────────────────┐
 │     User     │ ───────────────────────▶ │    Fisher    │ ───────────────────▶ │   Contract     │
 │  (Frontend)  │      (no gas!)           │   (NestJS)   │     (pays gas)       │ (EVVMCafeGasless)
 └──────────────┘                          └──────────────┘                      └────────────────┘
@@ -18,7 +18,7 @@ A NestJS-based relayer that executes gasless FHE transactions for EVVM.
 ### Gasless Flow
 
 1. **User** encrypts payment amount using FHE (client-side)
-2. **User** signs EIP-712 typed data (CoffeeOrderRequest) - **NO GAS REQUIRED**
+2. **User** signs EIP-191 typed data (CoffeeOrderRequest) - **NO GAS REQUIRED**
 3. **User** submits signature + encrypted data to Fisher API
 4. **Fisher** validates and calls `orderCoffeeGasless()` - **PAYS GAS**
 5. **Contract** verifies signature, processes FHE payment, rewards Fisher
@@ -189,7 +189,7 @@ The Fisher returns appropriate HTTP status codes:
 Common error messages:
 
 - `Signature has expired` - Deadline has passed
-- `Invalid signature` - EIP-712 signature verification failed
+- `Invalid signature` - EIP-191 signature verification failed
 - `Service nonce already used` - Retry with a new nonce
 - `User not registered in EVVM` - Client must register first
 - `Shop not registered in EVVM` - Shop must be registered
